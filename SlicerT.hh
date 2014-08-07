@@ -6,6 +6,31 @@
 #include <OpenMesh/Core/Mesh/Attributes.hh>
 #include "Eigen/Dense"
 
+
+template <typename M>
+class IntersectionT
+{
+public:
+  IntersectionT<M>(
+      typename M::Point p, 
+      typename M::VertexHandle f, 
+      typename M::VertexHandle t)
+  {
+    intersection = p;
+    from = f;
+    to = to;
+  }
+private:
+  typename M::Point intersection;
+  typename M::VertexHandle from;
+  typename M::VertexHandle to;
+  typename M::Point getIntersection(){ return intersection; };
+  typename M::VertexHandle getFrom(){ return from; };
+  typename M::VertexHandle getTo(){ return to; };
+
+};
+
+
 template <typename M>
 class SlicerT
 {
@@ -18,12 +43,14 @@ public:
   typedef typename Mesh::VertexHandle VertexHandle;
   
   SlicerT<M>(M m);
-  std::vector<std::vector<typename M::Point> > getToolpath();
+  std::vector<std::vector<typename M::Point > > getToolpath();
 
 private:
   Mesh mesh_;
 
 };
+
+
 
 
 #if defined(OM_INCLUDE_TEMPLATES) && !defined(SLICERT_CC)

@@ -8,7 +8,7 @@ SlicerT<M>::SlicerT(M m)
 
 
 template <typename M>
-std::vector<std::vector<typename M::Point> >
+std::vector<std::vector<typename M::Point > >
 SlicerT<M>::getToolpath()
 {
 
@@ -35,18 +35,18 @@ SlicerT<M>::getToolpath()
     }
 
     float diff = zMax - zMin;
-    float h = 0.0;
+    float h = zMin;
     float layer_height = 0.1;
     int iters = diff / layer_height;
 
-    std::vector<std::vector<Point> > toolpath;
+    std::vector<std::vector<IntersectionT<M> > > layers;
 
     Eigen::MatrixXd A(3,3);
 
     for(int i = 0; i < iters; i++)
     {
 
-      std::vector< Point > layer;
+      std::vector<IntersectionT<M> > layer;
 
       Eigen::Vector3d p0(7,  0, h);
       Eigen::Vector3d p1(10, 4, h);
@@ -79,13 +79,22 @@ SlicerT<M>::getToolpath()
         if((x[0] >= 0.0) && (x[0] <= 1.0))
         {
           Eigen::Vector3d intersection = la + (lb - la) * x[0];
-          layer.push_back(Point(intersection[0], intersection[1], intersection[2]));
+          Point p = Point(intersection[0], intersection[1], intersection[2]);
+          layer.push_back(IntersectionT<M>(p, vh0, vh1));
         }
       }
-      toolpath.push_back(layer);
+      layers.push_back(layer);
       h += layer_height;
 
     }
+
+    std::vector<std::vector<typename Mesh::Point > > toolpath;
+
+    for(int i = 0; i < layers.size(); i++)
+    {
+     //
+    }
+
 
     return toolpath;
 }
