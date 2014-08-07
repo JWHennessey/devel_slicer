@@ -16,6 +16,7 @@ public:
   typedef typename Mesh::EdgeIter EdgeIter;
   typedef typename Mesh::HalfedgeHandle HalfedgeHandle;
   typedef typename Mesh::VertexHandle VertexHandle;
+  
   SlicerT<M>(M m);
   std::vector<std::vector<typename M::Point> > getToolpath();
 

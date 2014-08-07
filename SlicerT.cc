@@ -62,7 +62,7 @@ SlicerT<M>::getToolpath()
         VertexHandle vh0 = mesh_.from_vertex_handle(heh);
         VertexHandle vh1 = mesh_.to_vertex_handle(heh);
 
-        std::cout << "Edge: " <<  *eIt << " From " << mesh_.point(vh0) << " To " << mesh_.point(vh1) << "\n";
+        //std::cout << "Edge: " <<  *eIt << " From " << mesh_.point(vh0) << " To " << mesh_.point(vh1) << "\n";
 
         // POINT PLANE INTERSECTION
         Eigen::Vector3d la(mesh_.point(vh0)[0], mesh_.point(vh0)[1], mesh_.point(vh0)[2]);
