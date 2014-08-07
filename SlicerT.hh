@@ -4,7 +4,7 @@
 #include <OpenMesh/Core/IO/MeshIO.hh>
 #include <OpenMesh/Core/IO/Options.hh>
 #include <OpenMesh/Core/Mesh/Attributes.hh>
-
+#include "Eigen/Dense"
 
 template <typename M>
 class SlicerT
@@ -12,8 +12,13 @@ class SlicerT
 public:
   typedef M        Mesh;
   typedef typename Mesh::Point Point;
+  typedef typename Mesh::VertexIter VertexIter;
+  typedef typename Mesh::EdgeIter EdgeIter;
+  typedef typename Mesh::HalfedgeHandle HalfedgeHandle;
+  typedef typename Mesh::VertexHandle VertexHandle;
   SlicerT<M>(M m);
   std::vector<std::vector<typename M::Point> > getToolpath();
+
 private:
   Mesh mesh_;
 
