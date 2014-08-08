@@ -105,6 +105,7 @@ SlicerT<M>::getToolpath()
       }
 
       std::vector<FaceHandle> seenFaces;
+      std::vector<EdgeHandle> seenEdges;
       seenFaces.push_back(currentFh);
       //Find all of the other edges at this height
       while(true)
@@ -120,11 +121,13 @@ SlicerT<M>::getToolpath()
           FaceEdgeIter feIt = mesh_.fe_iter(*ffIt);
           for(; feIt.is_valid(); ++feIt)
           {
+            if(std::find(seenEdges.begin(), seenEdges.end(), *feIt)!=seenEdges.end())
+              continue;
+            seenEdges.push_back(*feIt);
             HalfedgeHandle heh = mesh_.halfedge_handle(*feIt,0);
             if(linePlaneIntersection(&layer, heh, h))
             {
               currentFh = *ffIt;
-              break;
             }
           }
         }

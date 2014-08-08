@@ -45,6 +45,7 @@ public:
   typedef typename Mesh::HalfedgeHandle HalfedgeHandle;
   typedef typename Mesh::VertexHandle VertexHandle;
   typedef typename Mesh::FaceHandle FaceHandle;
+  typedef typename Mesh::EdgeHandle EdgeHandle;
   
   SlicerT<M>(M m);
   std::vector<std::vector<typename M::Point > > getToolpath();
