@@ -51,6 +51,10 @@ public:
 
 private:
   Mesh mesh_;
+  std::vector<std::vector<Point > > layers;
+  
+  std::pair <float, float> zAxisMinMax();
+  bool linePlaneIntersection(std::vector<Point> *layer, HalfedgeHandle heh, float h);
 
 };
 
