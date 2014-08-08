@@ -591,32 +591,32 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
     if(!toolpath.size())
       slice_mesh();
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    //glColor3f(1.0, 0.0, 0.0);
-    for(size_t i=0; i < toolpath.size(); i++)
-    {  
-      glVertexPointer(3, GL_FLOAT, 0, &toolpath[i][0]);
-      glPointSize(2.0f);
-      glDrawArrays( GL_POINTS, 0, static_cast<GLsizei>(toolpath[i].size()) );
-    }
-    glDisableClientState(GL_VERTEX_ARRAY);
-
-    //glLineWidth(1.0); 
+    //glEnableClientState(GL_VERTEX_ARRAY);
     ////glColor3f(1.0, 0.0, 0.0);
-    //glBegin(GL_LINES);
-
     //for(size_t i=0; i < toolpath.size(); i++)
-    //{
-      //for(size_t j=1; j < toolpath[i].size(); j++)
-      //{
-        //glVertex3f(toolpath[i][j-1][0], toolpath[i][j-1][1], toolpath[i][j-1][2]);
-        //glVertex3f(toolpath[i][j][0], toolpath[i][j][1], toolpath[i][j][2]);
-      //}
-      ////int end = toolpath[i].size() - 1;
-      ////glVertex3f(toolpath[i][end][0], toolpath[i][end][1], toolpath[i][end][2]);
-      ////glVertex3f(toolpath[i][0][0], toolpath[i][0][1], toolpath[i][0][2]);
+    //{  
+      //glVertexPointer(3, GL_FLOAT, 0, &toolpath[i][0]);
+      //glPointSize(2.0f);
+      //glDrawArrays( GL_POINTS, 0, static_cast<GLsizei>(toolpath[i].size()) );
     //}
-    //glEnd();
+    //glDisableClientState(GL_VERTEX_ARRAY);
+
+    glLineWidth(1.0); 
+    //glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINES);
+
+    for(size_t i=0; i < toolpath.size(); i++)
+    {
+      for(size_t j=1; j < toolpath[i].size(); j++)
+      {
+        glVertex3f(toolpath[i][j-1][0], toolpath[i][j-1][1], toolpath[i][j-1][2]);
+        glVertex3f(toolpath[i][j][0], toolpath[i][j][1], toolpath[i][j][2]);
+      }
+      int end = toolpath[i].size() - 1;
+      glVertex3f(toolpath[i][end][0], toolpath[i][end][1], toolpath[i][end][2]);
+      glVertex3f(toolpath[i][0][0], toolpath[i][0][1], toolpath[i][0][2]);
+    }
+    glEnd();
   }
 }
 

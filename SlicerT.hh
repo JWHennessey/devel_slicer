@@ -38,9 +38,13 @@ public:
   typedef M        Mesh;
   typedef typename Mesh::Point Point;
   typedef typename Mesh::VertexIter VertexIter;
+  typedef typename Mesh::FaceIter FaceIter;
+  typedef typename Mesh::FaceEdgeIter FaceEdgeIter;
+  typedef typename Mesh::FaceFaceIter FaceFaceIter;
   typedef typename Mesh::EdgeIter EdgeIter;
   typedef typename Mesh::HalfedgeHandle HalfedgeHandle;
   typedef typename Mesh::VertexHandle VertexHandle;
+  typedef typename Mesh::FaceHandle FaceHandle;
   
   SlicerT<M>(M m);
   std::vector<std::vector<typename M::Point > > getToolpath();
