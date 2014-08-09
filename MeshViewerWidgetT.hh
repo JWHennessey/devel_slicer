@@ -45,7 +45,8 @@
 
 
 //== INCLUDES =================================================================
-
+#include <QGraphicsScene>
+#include <QVBoxLayout> 
 #include <string>
 #include <OpenMesh/Core/IO/MeshIO.hh>
 #include <OpenMesh/Core/IO/Options.hh>
@@ -77,22 +78,7 @@ public:
 public:
 
   /// default constructor
-  MeshViewerWidgetT(QWidget* _parent=0)
-    : QGLViewerWidget(_parent),
-      f_strips_(false), 
-      tex_id_(0),
-      tex_mode_(GL_MODULATE),
-      strips_(mesh_),
-      use_color_(true),
-      show_vnormals_(false),
-      show_fnormals_(false)
-  {
-    add_draw_mode("Points");
-    add_draw_mode("Hidden-Line");
-#if defined(OM_USE_OSG) && OM_USE_OSG
-    add_draw_mode("OpenSG Indices");
-#endif
-  }
+  MeshViewerWidgetT(QWidget* _parent = 0);
   
   /// destructor
   ~MeshViewerWidgetT() {}
@@ -196,6 +182,7 @@ protected:
 
   // My Code
   std::vector<std::vector<typename Mesh::Point> > toolpath;
+  QDialog *createDialog(const QString &windowTitle) const;
 };
 
 

@@ -81,6 +81,47 @@ MeshViewerWidgetT<M>::slice_mesh()
    toolpath = slicer.getToolpath();
 }
 
+template <typename M>
+QDialog
+*MeshViewerWidgetT<M>::createDialog(const QString &windowTitle) const
+{
+  QDialog *dialog = new QDialog(0, Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+  
+  dialog->setWindowOpacity(0.8);
+  dialog->setWindowTitle(windowTitle);
+  dialog->setLayout(new QVBoxLayout);
+  
+  return dialog;
+}
+
+template <typename M>
+MeshViewerWidgetT<M>::MeshViewerWidgetT(QWidget* _parent)
+    : QGLViewerWidget(_parent),
+      f_strips_(false), 
+      tex_id_(0),
+      tex_mode_(GL_MODULATE),
+      strips_(mesh_),
+      use_color_(true),
+      show_vnormals_(false),
+      show_fnormals_(false)
+{
+    add_draw_mode("Points");
+    add_draw_mode("Hidden-Line");
+#if defined(OM_USE_OSG) && OM_USE_OSG
+    add_draw_mode("OpenSG Indices");
+#endif
+
+    //QWidget *controls = createDialog(tr("Controls"));
+
+    //QWidget *widgets[] = { controls };
+
+    //for (uint i = 0; i < sizeof(widgets) / sizeof(*widgets); ++i) {
+      //QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog);
+      //proxy->setWidget(widgets[i]);
+      //addItem(proxy);
+    //}
+}
+
 
 template <typename M>
 bool 
@@ -612,9 +653,9 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
         glVertex3f(toolpath[i][j-1][0], toolpath[i][j-1][1], toolpath[i][j-1][2]);
         glVertex3f(toolpath[i][j][0], toolpath[i][j][1], toolpath[i][j][2]);
       }
-      int end = toolpath[i].size() - 1;
-      glVertex3f(toolpath[i][end][0], toolpath[i][end][1], toolpath[i][end][2]);
-      glVertex3f(toolpath[i][0][0], toolpath[i][0][1], toolpath[i][0][2]);
+      //int end = toolpath[i].size() - 1;
+      //glVertex3f(toolpath[i][end][0], toolpath[i][end][1], toolpath[i][end][2]);
+      //glVertex3f(toolpath[i][0][0], toolpath[i][0][1], toolpath[i][0][2]);
     }
     glEnd();
   }

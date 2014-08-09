@@ -78,6 +78,7 @@ SlicerT<M>::getToolpath()
     float layer_height = 0.1;
     int iters = diff / layer_height;
 
+    h += 0.1;
     for(int i = 0; i < iters; i++)
     {
       std::vector<Point> layer;
