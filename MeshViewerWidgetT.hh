@@ -108,7 +108,7 @@ public:
   
 protected:
   
-  /// inherited drawing method
+  ////s inherited drawing method
   virtual void draw_scene(const std::string& _draw_mode);
   
 protected:

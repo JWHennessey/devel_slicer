@@ -79,6 +79,7 @@ MeshViewerWidgetT<M>::slice_mesh()
 {
    SlicerT<M> slicer = SlicerT<M>(mesh_);
    toolpath = slicer.getToolpath();
+   draw_openmesh("Gcode");
 }
 
 template <typename M>

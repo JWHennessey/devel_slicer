@@ -47,7 +47,6 @@
 #include <fstream>
 #include <QApplication>
 #include <QMessageBox>
-#include <QMainWindow>
 #include <QMenuBar>
 #include <QFileDialog>
 
@@ -57,6 +56,7 @@
 #include <GL/glut.h>
 #endif
 
+#include "MainWindow.hh"
 #include "MeshViewerWidget.hh"
 
 
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
   opt += OpenMesh::IO::Options::FaceTexCoord;
 
   // create widget
-  QMainWindow mainWin;
+  MainWindow mainWin;
   MeshViewerWidget w(&mainWin);
   w.setOptions(opt);
   mainWin.setCentralWidget(&w);
