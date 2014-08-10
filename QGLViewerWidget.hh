@@ -127,7 +127,7 @@ protected:
   void setDefaultMaterial(void);
   void setDefaultLight(void);
 
-private slots:  
+protected slots:  
 
   // popup menu clicked
   void slotDrawMode(QAction *_mode);  

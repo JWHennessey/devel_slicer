@@ -57,7 +57,6 @@
 #endif
 
 #include "MainWindow.hh"
-#include "MeshViewerWidget.hh"
 
 
 void create_menu(QMainWindow &w);
@@ -104,27 +103,26 @@ int main(int argc, char **argv)
 
   // create widget
   MainWindow mainWin;
-  MeshViewerWidget w(&mainWin);
-  w.setOptions(opt);
-  mainWin.setCentralWidget(&w);
+  //MeshViewerWidget w(&mainWin);
+  mainWin.setOptions(opt);
+  //mainWin.setCentralWidget(&w);
 
   create_menu(mainWin);
 
   // static mesh, hence use strips
-  w.enable_strips();
 
-  mainWin.resize(640, 480);
+  mainWin.resize(800, 600);
   mainWin.show();
 
   // load scene if specified on the command line
   if ( optind < argc )
   {
-    w.open_mesh_gui(argv[optind]);
+    mainWin.open_mesh_gui(argv[optind]);
   }
 
   if ( ++optind < argc )
   {
-      w.open_texture_gui(argv[optind]);
+      mainWin.open_texture_gui(argv[optind]);
   }
 
   return app.exec();

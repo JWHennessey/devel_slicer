@@ -47,6 +47,7 @@
 //== INCLUDES =================================================================
 #include <QGraphicsScene>
 #include <QVBoxLayout> 
+#include <QAction>
 #include <string>
 #include <OpenMesh/Core/IO/MeshIO.hh>
 #include <OpenMesh/Core/IO/Options.hh>
@@ -87,7 +88,8 @@ public:
 
 
   virtual void slice_mesh();
-
+  int getLayerCount();
+  int getLineNumber();
 
   /// open mesh
   virtual bool open_mesh(const char* _filename, OpenMesh::IO::Options _opt);
@@ -183,6 +185,12 @@ protected:
   // My Code
   std::vector<std::vector<typename Mesh::Point> > toolpath;
   QDialog *createDialog(const QString &windowTitle) const;
+  int layerHeight;
+  int lineNumber;
+
+public:
+  void setLayerHeight(int value);
+  void setLineNumber(int value);
 };
 
 

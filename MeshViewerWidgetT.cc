@@ -71,7 +71,40 @@ using namespace Qt;
 //== IMPLEMENTATION ========================================================== 
 
 
+template <typename M>
+int
+MeshViewerWidgetT<M>::getLayerCount()
+{
+  return toolpath.size();
+}
 
+
+template <typename M>
+int
+MeshViewerWidgetT<M>::getLineNumber()
+{
+  return toolpath[layerHeight-1].size();
+}
+
+
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::setLayerHeight(int value)
+{
+  layerHeight = value;
+  lineNumber = getLineNumber();
+  updateGL();
+}
+
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::setLineNumber(int value)
+{
+  lineNumber = value;
+  updateGL();
+}
 
 template <typename M>
 void 
@@ -79,7 +112,15 @@ MeshViewerWidgetT<M>::slice_mesh()
 {
    SlicerT<M> slicer = SlicerT<M>(mesh_);
    toolpath = slicer.getToolpath();
-   draw_openmesh("Gcode");
+   layerHeight = toolpath.size();
+   lineNumber = toolpath[layerHeight-1].size();
+   QAction *a = findAction("Gcode");
+   a->setChecked(true);
+   slotDrawMode(a);
+
+
+   //draw_mode_ = 0;
+   //draw_openmesh("Gcode");
 }
 
 template <typename M>
@@ -112,6 +153,8 @@ MeshViewerWidgetT<M>::MeshViewerWidgetT(QWidget* _parent)
     add_draw_mode("OpenSG Indices");
 #endif
 
+
+    std::cout << "MeshViewWidgetT Init \n";
     //QWidget *controls = createDialog(tr("Controls"));
 
     //QWidget *widgets[] = { controls };
@@ -647,7 +690,17 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
     //glColor3f(1.0, 0.0, 0.0);
     glBegin(GL_LINES);
 
-    for(size_t i=0; i < toolpath.size(); i++)
+    //Render the top most layer acouding to the line number
+    if(layerHeight > 0)
+    {
+      for(int j=1; j < lineNumber; j++)
+      {
+        glVertex3f(toolpath[layerHeight - 1][j-1][0], toolpath[layerHeight - 1][j-1][1], toolpath[layerHeight - 1][j-1][2]);
+        glVertex3f(toolpath[layerHeight - 1][j][0], toolpath[layerHeight - 1][j][1], toolpath[layerHeight - 1][j][2]);
+      }
+    }
+
+    for(int i=0; i < (layerHeight - 1); i++)
     {
       for(size_t j=1; j < toolpath[i].size(); j++)
       {

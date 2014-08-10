@@ -6,39 +6,24 @@
 
 MainWindow::MainWindow()
 {
-  //createDock();
-}
+  createDock();
+  setCentralWidget(&meshViewer);
+  meshViewer.enable_strips();
 
-
-void MainWindow::setCentralWidget(MeshViewerWidget* widget)
-{
-  QMainWindow::setCentralWidget(widget);
-  meshViewer = widget;
 }
 
 void MainWindow::createDock()
 {
-  QDockWidget *dock = new QDockWidget(tr("Controls"), this);
-  dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-
-  ControlsWidget* controls = new ControlsWidget(meshViewer);
+  dock = new QDockWidget(tr("Controls"), this);
+  dock->setAllowedAreas(Qt::LeftDockWidgetArea);
+  dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+  
+  ControlsWidget* controls = new ControlsWidget(&meshViewer);
   dock->setWidget(controls);
-  addDockWidget(Qt::RightDockWidgetArea, dock);
+
+  addDockWidget(Qt::LeftDockWidgetArea, dock);
 
 
-  //QButtonGroup* btnGroup = new QButtonGroup(this);
-  //QPushButton* sliceBtn = new QPushButton(this);
-  //sliceBtn->setText("Slice");
-  //connect(sliceBtn, SIGNAL(clicked()), this, SLOT(sliceButtonSlot()));
-  //btnGroup->addButton(sliceBtn);
-  //dock->setWidget(sliceBtn);
-  //addDockWidget(Qt::RightDockWidgetArea, dock);
-
-  //dock = new QDockWidget(tr("Height"), this);
-
-  //QSlider* layerHeight = new QSlider(Qt::Horizontal);
-  //dock->setWidget(layerHeight);
-  //addDockWidget(Qt::RightDockWidgetArea, dock);
 }
 
 

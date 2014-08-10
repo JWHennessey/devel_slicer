@@ -6,6 +6,8 @@
 #include <QSlider>
 #include <QButtonGroup>
 #include <QPushButton>
+#include <QGLWidget>
+
 #include "MeshViewerWidget.hh"
 #include "ControlsWidget.hh"
 
@@ -14,17 +16,16 @@ class MainWindow : public QMainWindow
 
 public:
    MainWindow();
-   void setCentralWidget(MeshViewerWidget* widget);
-
+   void setOptions(const OpenMesh::IO::Options& opts) { meshViewer.setOptions(opts); }
+   void open_mesh_gui(QString fname) { meshViewer.open_mesh_gui(fname); }
+   void open_texture_gui(QString fname) { meshViewer.open_texture_gui(fname); }
 private:
-  MeshViewerWidget* meshViewer;
+  MeshViewerWidget meshViewer;
+  QDockWidget *dock;
   void createDock();
 };
 
-#if !defined(MAINWINDOW_CC)
-#  define OPENMESH_MESHVIEWERWIDGET_TEMPLATES
-#  include "MainWindow.cc"
-#endif
+
 
 
 #endif
