@@ -37,10 +37,10 @@ void ControlsWidget::addControls()
   layerSlider->setHidden(true);
   vlay->addWidget(layerSlider);
 
-  lineSlider = new QSlider(Qt::Horizontal);
-  lineSlider->setMaximumHeight(200);
-  lineSlider->setHidden(true);
-  vlay->addWidget(lineSlider);
+  //lineSlider = new QSlider(Qt::Horizontal);
+  //lineSlider->setMaximumHeight(200);
+  //lineSlider->setHidden(true);
+  //vlay->addWidget(lineSlider);
 
   addActions();
 }
@@ -50,8 +50,8 @@ void ControlsWidget::addActions()
   connect(sliceBtn, SIGNAL(clicked()),this, SLOT(slice()));
   connect(layerSlider, SIGNAL(valueChanged(int)),
              this, SLOT(setLayerHeight(int)));
-  connect(lineSlider, SIGNAL(valueChanged(int)),
-             this, SLOT(setLineNumber(int)));
+  //connect(lineSlider, SIGNAL(valueChanged(int)),
+             //this, SLOT(setLineNumber(int)));
 }
 
 void ControlsWidget::slice()
@@ -63,10 +63,10 @@ void ControlsWidget::slice()
   layerSlider->setSliderPosition(count);
   layerSlider->setHidden(false);
 
-  int lineNo = meshViewer->getLineNumber();
-  lineSlider->setRange(1, lineNo);
-  lineSlider->setSliderPosition(lineNo);
-  lineSlider->setHidden(false);
+  //int lineNo = meshViewer->getLineNumber();
+  //lineSlider->setRange(1, lineNo);
+  //lineSlider->setSliderPosition(lineNo);
+  //lineSlider->setHidden(false);
 }
 
 void ControlsWidget::setLayerHeight(int value)

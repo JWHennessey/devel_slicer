@@ -86,7 +86,7 @@ MeshViewerWidgetT<M>::getLineNumber()
   lineNumber = 0;
   for(size_t i = 0; i< toolpath[layerHeight-1].size(); i++)
     lineNumber += toolpath[layerHeight-1][i].size();
-  return toolpath[layerHeight-1].size();
+  return lineNumber;
 }
 
 
@@ -696,14 +696,22 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
     //Render the top most layer acouding to the line number
     //if(layerHeight > 0)
     //{
+      //int k = 0;
+      //int nextLayerThreshold = toolpath[layerHeight-1][k].size();
       //for(int j=1; j < lineNumber; j++)
       //{
-        //glVertex3f(toolpath[layerHeight - 1][j-1][0], toolpath[layerHeight - 1][j-1][1], toolpath[layerHeight - 1][j-1][2]);
-        //glVertex3f(toolpath[layerHeight - 1][j][0], toolpath[layerHeight - 1][j][1], toolpath[layerHeight - 1][j][2]);
+        //if(j == nextLayerThreshold)
+        //{
+          //k++;
+          //nextLayerThreshold = toolpath[layerHeight-1][k].size();
+        //}
+        //glVertex3f(toolpath[layerHeight - 1][k][j-1][0], toolpath[layerHeight - 1][k][j-1][1], toolpath[layerHeight - 1][k][j-1][2]);
+        //glVertex3f(toolpath[layerHeight - 1][k][j][0], toolpath[layerHeight - 1][k][j][1], toolpath[layerHeight - 1][k][j][2]);
       //}
     //}
 
-    for(int i=0; i <= (layerHeight - 1); i++)
+    // if you have command slider for(int i=0; i < (layerHeight - 1); i++)
+    for(int i=0; i < layerHeight; i++)
     {
       for(size_t k=0; k < toolpath[i].size(); k++)
       {

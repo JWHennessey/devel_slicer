@@ -68,6 +68,9 @@ std::vector<std::vector<std::vector<typename M::Point > > >
 SlicerT<M>::getToolpath()
 {
 
+    
+    std::cout << "Face count: " << mesh_.n_faces() << "\n";
+  
     float zMin, zMax;
     std::pair <float, float> zAxisBoundry = zAxisMinMax();
     zMin = zAxisBoundry.first;
@@ -78,7 +81,7 @@ SlicerT<M>::getToolpath()
     float layer_height = 0.1;
     int iters = diff / layer_height;
 
-    h += 0.1;
+    h += layer_height;
     for(int i = 0; i < iters; i++)
     {
       std::vector<std::vector<Point> > layer;
@@ -154,6 +157,7 @@ SlicerT<M>::getToolpath()
               {
                 currentFh = *ffIt;
                 layerSize++;
+                //break;
               }
             }
           }
