@@ -83,6 +83,9 @@ template <typename M>
 int
 MeshViewerWidgetT<M>::getLineNumber()
 {
+  lineNumber = 0;
+  for(size_t i = 0; i< toolpath[layerHeight-1].size(); i++)
+    lineNumber += toolpath[layerHeight-1][i].size();
   return toolpath[layerHeight-1].size();
 }
 
@@ -113,7 +116,7 @@ MeshViewerWidgetT<M>::slice_mesh()
    SlicerT<M> slicer = SlicerT<M>(mesh_);
    toolpath = slicer.getToolpath();
    layerHeight = toolpath.size();
-   lineNumber = toolpath[layerHeight-1].size();
+   lineNumber = getLineNumber();
    QAction *a = findAction("Gcode");
    a->setChecked(true);
    slotDrawMode(a);
@@ -691,25 +694,28 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
     glBegin(GL_LINES);
 
     //Render the top most layer acouding to the line number
-    if(layerHeight > 0)
-    {
-      for(int j=1; j < lineNumber; j++)
-      {
-        glVertex3f(toolpath[layerHeight - 1][j-1][0], toolpath[layerHeight - 1][j-1][1], toolpath[layerHeight - 1][j-1][2]);
-        glVertex3f(toolpath[layerHeight - 1][j][0], toolpath[layerHeight - 1][j][1], toolpath[layerHeight - 1][j][2]);
-      }
-    }
+    //if(layerHeight > 0)
+    //{
+      //for(int j=1; j < lineNumber; j++)
+      //{
+        //glVertex3f(toolpath[layerHeight - 1][j-1][0], toolpath[layerHeight - 1][j-1][1], toolpath[layerHeight - 1][j-1][2]);
+        //glVertex3f(toolpath[layerHeight - 1][j][0], toolpath[layerHeight - 1][j][1], toolpath[layerHeight - 1][j][2]);
+      //}
+    //}
 
-    for(int i=0; i < (layerHeight - 1); i++)
+    for(int i=0; i <= (layerHeight - 1); i++)
     {
-      for(size_t j=1; j < toolpath[i].size(); j++)
+      for(size_t k=0; k < toolpath[i].size(); k++)
       {
-        glVertex3f(toolpath[i][j-1][0], toolpath[i][j-1][1], toolpath[i][j-1][2]);
-        glVertex3f(toolpath[i][j][0], toolpath[i][j][1], toolpath[i][j][2]);
+        for(size_t j=1; j < toolpath[i][k].size(); j++)
+        {
+          glVertex3f(toolpath[i][k][j-1][0], toolpath[i][k][j-1][1], toolpath[i][k][j-1][2]);
+          glVertex3f(toolpath[i][k][j][0], toolpath[i][k][j][1], toolpath[i][k][j][2]);
+        }
+        int end = toolpath[i][k].size() - 1;
+        glVertex3f(toolpath[i][k][end][0], toolpath[i][k][end][1], toolpath[i][k][end][2]);
+        glVertex3f(toolpath[i][k][0][0], toolpath[i][k][0][1], toolpath[i][k][0][2]);
       }
-      //int end = toolpath[i].size() - 1;
-      //glVertex3f(toolpath[i][end][0], toolpath[i][end][1], toolpath[i][end][2]);
-      //glVertex3f(toolpath[i][0][0], toolpath[i][0][1], toolpath[i][0][2]);
     }
     glEnd();
   }

@@ -183,7 +183,7 @@ protected:
   OpenMesh::FPropHandleT< typename Mesh::Point > fp_normal_base_;
 
   // My Code
-  std::vector<std::vector<typename Mesh::Point> > toolpath;
+  std::vector<std::vector<std::vector<typename Mesh::Point> > > toolpath;
   QDialog *createDialog(const QString &windowTitle) const;
   int layerHeight;
   int lineNumber;

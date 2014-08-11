@@ -64,7 +64,7 @@ SlicerT<M>::linePlaneIntersection(std::vector<Point> *layer, HalfedgeHandle heh,
 }
 
 template <typename M>
-std::vector<std::vector<typename M::Point > >
+std::vector<std::vector<std::vector<typename M::Point > > >
 SlicerT<M>::getToolpath()
 {
 
@@ -81,57 +81,84 @@ SlicerT<M>::getToolpath()
     h += 0.1;
     for(int i = 0; i < iters; i++)
     {
-      std::vector<Point> layer;
+      std::vector<std::vector<Point> > layer;
+      std::vector<Point> intersections;
+      std::vector<EdgeHandle> seenEdges;
+      std::vector<FaceHandle> seenFaces;
+      size_t layerSize = 0;
+
+      EdgeIter eIt(mesh_.edges_begin());
+      EdgeIter eEnd(mesh_.edges_end());
+      for(eIt; eIt!=eEnd; eIt++)
+      {
+        HalfedgeHandle heh = mesh_.halfedge_handle(*eIt,0);
+        linePlaneIntersection(&intersections, heh, h);
+      }
 
       FaceIter fIt(mesh_.faces_begin());
       FaceIter fEnd(mesh_.faces_end());
       FaceHandle currentFh;
       FaceHandle previousFh;
-      bool foundFirstEdge = false;
       //Find the first edge at this height
-      for (fIt; fIt!=fEnd; ++fIt)
+      while(layerSize < intersections.size())
       {
-        FaceEdgeIter feIt = mesh_.fe_iter(*fIt);
-        for(; feIt.is_valid(); ++feIt)
-        {
-          HalfedgeHandle heh = mesh_.halfedge_handle(*feIt,0);
-          if(linePlaneIntersection(&layer, heh, h))
-          {
-            currentFh = *fIt;
-            foundFirstEdge = true;
-          }
-          if(foundFirstEdge) break;
-        }
-        if(foundFirstEdge) break;
-      }
+        std::vector<Point> layerSection;
+        //std::cout << layers.size() << " / " << intersections.size() << "\n";
+        bool foundFirstEdge = false;
 
-      std::vector<FaceHandle> seenFaces;
-      std::vector<EdgeHandle> seenEdges;
-      seenFaces.push_back(currentFh);
-      //Find all of the other edges at this height
-      while(true)
-      {
-        if(currentFh == previousFh) break;
-        previousFh = currentFh;
-        FaceFaceIter ffIt = mesh_.ff_iter(currentFh);
-        for(; ffIt.is_valid(); ++ffIt)
+        for (fIt; fIt!=fEnd; ++fIt)
         {
-          if(std::find(seenFaces.begin(), seenFaces.end(), *ffIt)!=seenFaces.end())
-            continue;
-          seenFaces.push_back(*ffIt);
-          FaceEdgeIter feIt = mesh_.fe_iter(*ffIt);
+          FaceEdgeIter feIt = mesh_.fe_iter(*fIt);
           for(; feIt.is_valid(); ++feIt)
           {
             if(std::find(seenEdges.begin(), seenEdges.end(), *feIt)!=seenEdges.end())
               continue;
-            seenEdges.push_back(*feIt);
+
             HalfedgeHandle heh = mesh_.halfedge_handle(*feIt,0);
-            if(linePlaneIntersection(&layer, heh, h))
+            if(linePlaneIntersection(&layerSection, heh, h))
             {
-              currentFh = *ffIt;
+              seenEdges.push_back(*feIt);
+              currentFh = *fIt;
+              foundFirstEdge = true;
+              layerSize++;
+            }
+            if(foundFirstEdge) break;
+          }
+          if(foundFirstEdge) break;
+        }
+
+        seenFaces.push_back(currentFh);
+        //Find all of the other edges at this height
+        while(true)
+        {
+          if(currentFh == previousFh) break;
+
+          // If I remove this I get segmentation fault ?!?!??!
+          std::cout << "";
+
+          previousFh = currentFh;
+          FaceFaceIter ffIt = mesh_.ff_iter(currentFh);
+          for(; ffIt.is_valid(); ++ffIt)
+          {
+            if(std::find(seenFaces.begin(), seenFaces.end(), *ffIt)!=seenFaces.end())
+              continue;
+            seenFaces.push_back(*ffIt);
+            FaceEdgeIter feIt = mesh_.fe_iter(*ffIt);
+            for(; feIt.is_valid(); ++feIt)
+            {
+              if(std::find(seenEdges.begin(), seenEdges.end(), *feIt)!=seenEdges.end())
+                continue;
+              seenEdges.push_back(*feIt);
+              HalfedgeHandle heh = mesh_.halfedge_handle(*feIt,0);
+              if(linePlaneIntersection(&layerSection, heh, h))
+              {
+                currentFh = *ffIt;
+                layerSize++;
+              }
             }
           }
         }
+        layer.push_back(layerSection);
       }
       layers.push_back(layer);
       h += layer_height;
