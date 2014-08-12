@@ -72,6 +72,50 @@ using namespace Qt;
 
 
 template <typename M>
+void
+MeshViewerWidgetT<M>::rotate(int deg, Eigen::Vector3f axis)
+{
+  float angle_in_radian = (deg * M_PI) / 180;
+  Eigen::AngleAxis<float> aa(angle_in_radian, axis);
+  Eigen::Affine3f t(aa);
+
+  VertexIter vIt(mesh_.vertices_begin());
+  VertexIter vEnd(mesh_.vertices_end());
+  
+  for (vIt; vIt!=vEnd; ++vIt)
+  {
+    Point p = mesh_.point(*vIt);
+    Eigen::Vector3f x(p[0], p[1], p[2]);
+    x = t * x;
+    Point px(x[0], x[1], x[2]);
+    mesh_.point(*vIt) = px;
+  }
+  updateGL();
+}
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::rotateX(int deg)
+{
+  rotate(deg, Eigen::Vector3f(1,0,0));
+}
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::rotateY(int deg)
+{
+  rotate(deg, Eigen::Vector3f(0,1,0));
+}
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::rotateZ(int deg)
+{
+  rotate(deg, Eigen::Vector3f(0,0,1));
+}
+
+
+template <typename M>
 int
 MeshViewerWidgetT<M>::getLayerCount()
 {
@@ -96,7 +140,8 @@ void
 MeshViewerWidgetT<M>::setLayerHeight(int value)
 {
   layerHeight = value;
-  lineNumber = getLineNumber();
+  if(layerHeight >= 1)
+    lineNumber = getLineNumber();
   updateGL();
 }
 
@@ -111,9 +156,9 @@ MeshViewerWidgetT<M>::setLineNumber(int value)
 
 template <typename M>
 void 
-MeshViewerWidgetT<M>::slice_mesh()
+MeshViewerWidgetT<M>::slice_mesh(double layerHeight)
 {
-   SlicerT<M> slicer = SlicerT<M>(mesh_);
+   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight);
    toolpath = slicer.getToolpath();
    layerHeight = toolpath.size();
    lineNumber = getLineNumber();
@@ -677,55 +722,63 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
   {
 
     if(!toolpath.size())
-      slice_mesh();
-
-    //glEnableClientState(GL_VERTEX_ARRAY);
-    ////glColor3f(1.0, 0.0, 0.0);
-    //for(size_t i=0; i < toolpath.size(); i++)
-    //{  
-      //glVertexPointer(3, GL_FLOAT, 0, &toolpath[i][0]);
-      //glPointSize(2.0f);
-      //glDrawArrays( GL_POINTS, 0, static_cast<GLsizei>(toolpath[i].size()) );
-    //}
-    //glDisableClientState(GL_VERTEX_ARRAY);
-
-    glLineWidth(1.0); 
-    //glColor3f(1.0, 0.0, 0.0);
-    glBegin(GL_LINES);
-
-    //Render the top most layer acouding to the line number
-    //if(layerHeight > 0)
-    //{
-      //int k = 0;
-      //int nextLayerThreshold = toolpath[layerHeight-1][k].size();
-      //for(int j=1; j < lineNumber; j++)
-      //{
-        //if(j == nextLayerThreshold)
-        //{
-          //k++;
-          //nextLayerThreshold = toolpath[layerHeight-1][k].size();
-        //}
-        //glVertex3f(toolpath[layerHeight - 1][k][j-1][0], toolpath[layerHeight - 1][k][j-1][1], toolpath[layerHeight - 1][k][j-1][2]);
-        //glVertex3f(toolpath[layerHeight - 1][k][j][0], toolpath[layerHeight - 1][k][j][1], toolpath[layerHeight - 1][k][j][2]);
-      //}
-    //}
-
-    // if you have command slider for(int i=0; i < (layerHeight - 1); i++)
-    for(int i=0; i < layerHeight; i++)
+      std::cout << "You need to slice mesh\n";
+    else
     {
-      for(size_t k=0; k < toolpath[i].size(); k++)
+
+      glEnableClientState(GL_VERTEX_ARRAY);
+      //glColor3f(1.0, 0.0, 0.0);
+      for(int j=0; j < layerHeight; j++)
       {
-        for(size_t j=1; j < toolpath[i][k].size(); j++)
-        {
-          glVertex3f(toolpath[i][k][j-1][0], toolpath[i][k][j-1][1], toolpath[i][k][j-1][2]);
-          glVertex3f(toolpath[i][k][j][0], toolpath[i][k][j][1], toolpath[i][k][j][2]);
+        for(size_t i=0; i < toolpath[j].size(); i++)
+        {  
+          glVertexPointer(3, GL_FLOAT, 0, &toolpath[j][i][0]);
+          glPointSize(2.0f);
+          glDrawArrays( GL_POINTS, 0, static_cast<GLsizei>(toolpath[j][i].size()) );
         }
-        int end = toolpath[i][k].size() - 1;
-        glVertex3f(toolpath[i][k][end][0], toolpath[i][k][end][1], toolpath[i][k][end][2]);
-        glVertex3f(toolpath[i][k][0][0], toolpath[i][k][0][1], toolpath[i][k][0][2]);
       }
+      glDisableClientState(GL_VERTEX_ARRAY);
+
+      glLineWidth(1.0); 
+      //glColor3f(1.0, 0.0, 0.0);
+      glBegin(GL_LINES);
+
+      //Render the top most layer acouding to the line number
+      //if(layerHeight > 0)
+      //{
+        //int k = 0;
+        //int nextLayerThreshold = toolpath[layerHeight-1][k].size();
+        //for(int j=1; j < lineNumber; j++)
+        //{
+          //if(j == nextLayerThreshold)
+          //{
+            //k++;
+            //nextLayerThreshold = toolpath[layerHeight-1][k].size();
+          //}
+          //glVertex3f(toolpath[layerHeight - 1][k][j-1][0], toolpath[layerHeight - 1][k][j-1][1], toolpath[layerHeight - 1][k][j-1][2]);
+          //glVertex3f(toolpath[layerHeight - 1][k][j][0], toolpath[layerHeight - 1][k][j][1], toolpath[layerHeight - 1][k][j][2]);
+        //}
+      //}
+
+      // if you have command slider for(int i=0; i < (layerHeight - 1); i++)
+      for(int i=0; i < layerHeight; i++)
+      {
+        for(size_t k=0; k < toolpath[i].size(); k++)
+        {
+          //std::cout << "Inside K Loop \n";
+          for(size_t j=1; j < toolpath[i][k].size(); j++)
+          {
+            //std::cout << "Inside J Loop \n";
+            glVertex3f(toolpath[i][k][j-1][0], toolpath[i][k][j-1][1], toolpath[i][k][j-1][2]);
+            glVertex3f(toolpath[i][k][j][0], toolpath[i][k][j][1], toolpath[i][k][j][2]);
+          }
+          //int end = toolpath[i][k].size() - 1;
+          //glVertex3f(toolpath[i][k][end][0], toolpath[i][k][end][1], toolpath[i][k][end][2]);
+          //glVertex3f(toolpath[i][k][0][0], toolpath[i][k][0][1], toolpath[i][k][0][2]);
+        }
+      }
+      glEnd();
     }
-    glEnd();
   }
 }
 

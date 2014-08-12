@@ -110,7 +110,8 @@ public:
     }
     void slice_mesh_gui()
     {
-      slice_mesh();
+      std::cout << "Slice mesh gui feature removed \n";
+      //slice_mesh();
     }
 
 public slots:

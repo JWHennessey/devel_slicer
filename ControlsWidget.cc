@@ -29,6 +29,24 @@ ControlsWidget::ControlsWidget(MeshViewerWidget* mv)
 void ControlsWidget::addControls()
 {
   QVBoxLayout *vlay = new QVBoxLayout(this);
+  
+  rotateXBtn = new QPushButton("Rotate X (90)");
+  vlay->addWidget(rotateXBtn);
+  
+  rotateYBtn = new QPushButton("Rotate Y (90)");
+  vlay->addWidget(rotateYBtn);
+  
+  rotateZBtn = new QPushButton("Rotate Z (90)");
+  vlay->addWidget(rotateZBtn);
+
+
+  layerHeightSpinBox = new QDoubleSpinBox();
+  layerHeightSpinBox->setPrefix("Layer Height:  ");
+  layerHeightSpinBox->setRange(0.01, 1.0);
+  layerHeightSpinBox->setSingleStep(0.01);
+  layerHeightSpinBox->setValue(0.1);
+  vlay->addWidget(layerHeightSpinBox);
+
   sliceBtn = new QPushButton("Slice Mesh");
   vlay->addWidget(sliceBtn);
 
@@ -48,6 +66,9 @@ void ControlsWidget::addControls()
 void ControlsWidget::addActions()
 {
   connect(sliceBtn, SIGNAL(clicked()),this, SLOT(slice()));
+  connect(rotateXBtn, SIGNAL(clicked()),this, SLOT(rotateX()));
+  connect(rotateYBtn, SIGNAL(clicked()),this, SLOT(rotateY()));
+  connect(rotateZBtn, SIGNAL(clicked()),this, SLOT(rotateZ()));
   connect(layerSlider, SIGNAL(valueChanged(int)),
              this, SLOT(setLayerHeight(int)));
   //connect(lineSlider, SIGNAL(valueChanged(int)),
@@ -56,7 +77,8 @@ void ControlsWidget::addActions()
 
 void ControlsWidget::slice()
 {
-  meshViewer->slice_mesh();
+  double layerHeight = layerHeightSpinBox->value();
+  meshViewer->slice_mesh(layerHeight);
 
   int count = meshViewer->getLayerCount();
   layerSlider->setRange(0, count);
@@ -77,6 +99,21 @@ void ControlsWidget::setLayerHeight(int value)
 void ControlsWidget::setLineNumber(int value)
 {
   meshViewer->setLineNumber(value);
+}
+
+void ControlsWidget::rotateX()
+{
+  meshViewer->rotateX(90);
+}
+
+void ControlsWidget::rotateY()
+{
+  meshViewer->rotateX(90);
+}
+
+void ControlsWidget::rotateZ()
+{
+  meshViewer->rotateZ(90);
 }
 
 #endif

@@ -1,9 +1,10 @@
 #define SLICERT_CC
 
 template <typename M>
-SlicerT<M>::SlicerT(M m)
+SlicerT<M>::SlicerT(M m, double lh)
 {
   mesh_ = m;
+  layer_height = lh;
 }
 
 template <typename M>
@@ -68,9 +69,6 @@ std::vector<std::vector<std::vector<typename M::Point > > >
 SlicerT<M>::getToolpath()
 {
 
-    
-    std::cout << "Face count: " << mesh_.n_faces() << "\n";
-  
     float zMin, zMax;
     std::pair <float, float> zAxisBoundry = zAxisMinMax();
     zMin = zAxisBoundry.first;
@@ -78,10 +76,9 @@ SlicerT<M>::getToolpath()
 
     float diff = zMax - zMin;
     float h = zMin;
-    float layer_height = 0.1;
     int iters = diff / layer_height;
 
-    h += layer_height;
+    //h += layer_height;
     for(int i = 0; i < iters; i++)
     {
       std::vector<std::vector<Point> > layer;
@@ -105,6 +102,8 @@ SlicerT<M>::getToolpath()
       //Find the first edge at this height
       while(layerSize < intersections.size())
       {
+        std::cout << layerSize << " / " << intersections.size() << "\n";
+
         std::vector<Point> layerSection;
         //std::cout << layers.size() << " / " << intersections.size() << "\n";
         bool foundFirstEdge = false;
@@ -120,47 +119,77 @@ SlicerT<M>::getToolpath()
             HalfedgeHandle heh = mesh_.halfedge_handle(*feIt,0);
             if(linePlaneIntersection(&layerSection, heh, h))
             {
-              seenEdges.push_back(*feIt);
               currentFh = *fIt;
               foundFirstEdge = true;
-              layerSize++;
+              //layerSize++;
             }
             if(foundFirstEdge) break;
           }
           if(foundFirstEdge) break;
         }
 
-        seenFaces.push_back(currentFh);
+        
         //Find all of the other edges at this height
         while(true)
         {
           if(currentFh == previousFh) break;
 
-          // If I remove this I get segmentation fault ?!?!??!
-          std::cout << "";
-
           previousFh = currentFh;
-          FaceFaceIter ffIt = mesh_.ff_iter(currentFh);
-          for(; ffIt.is_valid(); ++ffIt)
+          seenFaces.push_back(currentFh);
+          //FaceFaceIter ffIt = mesh_.ff_iter(currentFh);
+          FaceEdgeIter feIt = mesh_.fe_iter(currentFh);
+          for(; feIt.is_valid(); ++feIt)
           {
-            if(std::find(seenFaces.begin(), seenFaces.end(), *ffIt)!=seenFaces.end())
-              continue;
-            seenFaces.push_back(*ffIt);
-            FaceEdgeIter feIt = mesh_.fe_iter(*ffIt);
-            for(; feIt.is_valid(); ++feIt)
-            {
               if(std::find(seenEdges.begin(), seenEdges.end(), *feIt)!=seenEdges.end())
                 continue;
               seenEdges.push_back(*feIt);
               HalfedgeHandle heh = mesh_.halfedge_handle(*feIt,0);
               if(linePlaneIntersection(&layerSection, heh, h))
               {
-                currentFh = *ffIt;
                 layerSize++;
-                //break;
+                //HalfedgeHandle opposite_heh = mesh_.opposite_halfedge_handle(heh);
+                std::cout << "Before currentFh \n";
+                currentFh = mesh_.opposite_face_handle(heh);
+                std::cout << "Updated currentFh \n";
+                break;
               }
-            }
-          }
+           }
+
+          //if(currentFh == previousFh)
+          //{
+            //FaceFaceIter ffIt = mesh_.ff_iter(currentFh);
+            //for(; ffIt.is_valid(); ++ffIt)
+            //{
+              //if(std::find(seenFaces.begin(), seenFaces.end(), *ffIt)!=seenFaces.end())
+                //continue;
+              
+              //seenFaces.push_back(*ffIt);
+              //currentFh = *ffIt;
+              //break;
+            //}
+          //}
+
+          //for(; ffIt.is_valid(); ++ffIt)
+          //{
+            //if(std::find(seenFaces.begin(), seenFaces.end(), *ffIt)!=seenFaces.end())
+              //continue;
+            //seenFaces.push_back(*ffIt);
+            //std::vector<Point> candidates;
+            //FaceEdgeIter feIt = mesh_.fe_iter(*ffIt);
+            //for(; feIt.is_valid(); ++feIt)
+            //{
+              //if(std::find(seenEdges.begin(), seenEdges.end(), *feIt)!=seenEdges.end())
+                //continue;
+              //HalfedgeHandle heh = mesh_.halfedge_handle(*feIt,0);
+              //if(linePlaneIntersection(&candidates, heh, h))
+              //{
+                //currentFh = *ffIt;
+                //seenEdges.push_back(*feIt);
+                //layerSize++;
+                ////break;
+              //}
+            //}
+          //}
         }
         layer.push_back(layerSection);
       }
@@ -170,4 +199,35 @@ SlicerT<M>::getToolpath()
     }
 
     return layers;
+}
+
+
+template <typename M>
+void
+SlicerT<M>::resampleLayerSection(std::vector<Point>* layerSection)
+{
+  //std::vector<Point> newLayerSection;
+  //for(size_t i = 1; i < layerSection->size(); i++)
+  //{
+    //double distCount = 0.0;
+    //size_t pointsAdded = 0;
+
+    //Point a = layerSection->at(i-1);
+    //Point b = layerSection->at(i);
+    //Point direction = b - a;
+    //Eigen::Vector3d aVec(a[0], a[1], a[2]);
+
+    //Eigen::Vector3d d(direction[0], direction[1], direction[2]);
+    //int iters = d.norm() / 0.1;
+    ////Point c = a + (b - a) * 0.1;
+    //newLayerSection.push_back(a);
+    //for(int j = 1; j < iters; j++)
+    //{
+      //Eigen::Vector3d xVec = aVec + (j * d);
+      //Point x(xVec[0], xVec[1],xVec[2]);
+      //newLayerSection.push_back(x);
+    //}
+    //newLayerSection.push_back(b);
+  //}
+  //layerSection = &newLayerSection;
 }

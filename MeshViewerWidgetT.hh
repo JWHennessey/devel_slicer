@@ -43,7 +43,7 @@
 #ifndef OPENMESHAPPS_MESHVIEWERWIDGETT_HH
 #define OPENMESHAPPS_MESHVIEWERWIDGETT_HH
 
-
+#include <math.h>
 //== INCLUDES =================================================================
 #include <QGraphicsScene>
 #include <QVBoxLayout> 
@@ -58,7 +58,8 @@
 #include <OpenMesh/Tools/Utils/Timer.hh>
 #include <OpenMesh/Apps/Slicer/QGLViewerWidget.hh>
 #include <OpenMesh/Apps/Slicer/SlicerT.hh>
-
+#include "Eigen/Dense"
+#include "Eigen/Geometry"
 
 //== FORWARDS =================================================================
 
@@ -76,6 +77,8 @@ public:
   typedef M                             Mesh;
   typedef OpenMesh::StripifierT<Mesh>   MyStripifier;
   typedef typename Mesh::Point Point;
+  typedef typename Mesh::VertexIter VertexIter;
+
 public:
 
   /// default constructor
@@ -87,9 +90,12 @@ public:
 public:
 
 
-  virtual void slice_mesh();
+  virtual void slice_mesh(double layerHeight);
   int getLayerCount();
   int getLineNumber();
+  void rotateX(int deg);
+  void rotateY(int deg);
+  void rotateZ(int deg);
 
   /// open mesh
   virtual bool open_mesh(const char* _filename, OpenMesh::IO::Options _opt);
@@ -114,7 +120,8 @@ protected:
   virtual void draw_scene(const std::string& _draw_mode);
   
 protected:
-  
+  void rotate(int deg, Eigen::Vector3f axis);
+
   /// draw the mesh
   virtual void draw_openmesh(const std::string& _drawmode);
 

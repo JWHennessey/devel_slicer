@@ -46,15 +46,16 @@ public:
   typedef typename Mesh::VertexHandle VertexHandle;
   typedef typename Mesh::FaceHandle FaceHandle;
   typedef typename Mesh::EdgeHandle EdgeHandle;
-  SlicerT<M>(M m);
+  SlicerT<M>(M m, double lh);
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpath();
 
 private:
   Mesh mesh_;
   std::vector<std::vector<std::vector<Point > > > layers;
-  
+  double layer_height;
   std::pair <float, float> zAxisMinMax();
   bool linePlaneIntersection(std::vector<Point> *layer, HalfedgeHandle heh, float h);
+  void resampleLayerSection(std::vector<Point>* layerSection);
 
 };
 
