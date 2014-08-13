@@ -727,7 +727,7 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
     {
 
       glEnableClientState(GL_VERTEX_ARRAY);
-      //glColor3f(1.0, 0.0, 0.0);
+      glColor3f(1.0, 0.0, 0.0);
       for(int j=0; j < layerHeight; j++)
       {
         for(size_t i=0; i < toolpath[j].size(); i++)
@@ -740,7 +740,7 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
       glDisableClientState(GL_VERTEX_ARRAY);
 
       glLineWidth(1.0); 
-      //glColor3f(1.0, 0.0, 0.0);
+      glColor3f(1.0, 1.0, 1.0);
       glBegin(GL_LINES);
 
       //Render the top most layer acouding to the line number

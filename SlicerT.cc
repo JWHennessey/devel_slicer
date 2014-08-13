@@ -146,9 +146,9 @@ SlicerT<M>::getToolpath()
                 currentEh = *veIt;
                 edgeFound = true;
               }
-              if(edgeFound) break;
+              //if(edgeFound) break;
             }
-            if(edgeFound) break;
+            //if(edgeFound) break;
           }
         }
         layer.push_back(layerSection);
@@ -190,3 +190,4 @@ SlicerT<M>::resampleLayerSection(std::vector<Point>* layerSection)
   //}
   //layerSection = &newLayerSection;
 }
+
