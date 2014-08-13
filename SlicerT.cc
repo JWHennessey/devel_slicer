@@ -84,7 +84,7 @@ SlicerT<M>::getToolpath()
       std::vector<std::vector<Point> > layer;
       std::vector<Point> intersections;
       std::vector<EdgeHandle> seenEdges;
-      std::vector<FaceHandle> seenFaces;
+      std::vector<EdgeHandle> toVisitEdges;
       size_t layerSize = 0;
 
       EdgeIter eIt(mesh_.edges_begin());
@@ -92,112 +92,71 @@ SlicerT<M>::getToolpath()
       for(eIt; eIt!=eEnd; eIt++)
       {
         HalfedgeHandle heh = mesh_.halfedge_handle(*eIt,0);
-        linePlaneIntersection(&intersections, heh, h);
+        if(linePlaneIntersection(&intersections, heh, h))
+        {
+          toVisitEdges.push_back(*eIt);
+        }
       }
 
-      FaceIter fIt(mesh_.faces_begin());
-      FaceIter fEnd(mesh_.faces_end());
-      FaceHandle currentFh;
-      FaceHandle previousFh;
+      //delete intersections;
+
+      EdgeHandle currentEh;
+      EdgeHandle previousEh;
+
       //Find the first edge at this height
-      while(layerSize < intersections.size())
+      while(layerSize < toVisitEdges.size())
       {
-        std::cout << layerSize << " / " << intersections.size() << "\n";
-
         std::vector<Point> layerSection;
-        //std::cout << layers.size() << " / " << intersections.size() << "\n";
-        bool foundFirstEdge = false;
-
-        for (fIt; fIt!=fEnd; ++fIt)
+        size_t i = 0;
+        for(; i < toVisitEdges.size(); i++)
         {
-          FaceEdgeIter feIt = mesh_.fe_iter(*fIt);
-          for(; feIt.is_valid(); ++feIt)
-          {
-            if(std::find(seenEdges.begin(), seenEdges.end(), *feIt)!=seenEdges.end())
-              continue;
-
-            HalfedgeHandle heh = mesh_.halfedge_handle(*feIt,0);
-            if(linePlaneIntersection(&layerSection, heh, h))
-            {
-              currentFh = *fIt;
-              foundFirstEdge = true;
-              //layerSize++;
-            }
-            if(foundFirstEdge) break;
-          }
-          if(foundFirstEdge) break;
+          currentEh = toVisitEdges.at(i);
+          if(std::find(seenEdges.begin(), seenEdges.end(), currentEh)!=seenEdges.end())
+            continue;
+          seenEdges.push_back(currentEh);
+          HalfedgeHandle heh = mesh_.halfedge_handle(currentEh,0);
+          linePlaneIntersection(&layerSection, heh, h);
+          layerSize++;
+          break;
         }
 
-        
-        //Find all of the other edges at this height
         while(true)
         {
-          if(currentFh == previousFh) break;
+          if(currentEh == previousEh) break;
 
-          previousFh = currentFh;
-          seenFaces.push_back(currentFh);
-          //FaceFaceIter ffIt = mesh_.ff_iter(currentFh);
-          FaceEdgeIter feIt = mesh_.fe_iter(currentFh);
-          for(; feIt.is_valid(); ++feIt)
+          previousEh = currentEh;
+
+          HalfedgeHandle heh = mesh_.halfedge_handle(currentEh,0);
+          std::vector<VertexHandle> vhs;
+          vhs.push_back(mesh_.from_vertex_handle(heh));
+          vhs.push_back(mesh_.to_vertex_handle(heh));
+          bool edgeFound = false;
+          for(size_t i = 0; i < vhs.size(); i++)
           {
-              if(std::find(seenEdges.begin(), seenEdges.end(), *feIt)!=seenEdges.end())
+            VertexEdgeIter veIt = mesh_.ve_iter(vhs.at(i));
+            for(; veIt.is_valid(); ++veIt)
+            {
+              if(std::find(seenEdges.begin(), seenEdges.end(), *veIt)!=seenEdges.end())
                 continue;
-              seenEdges.push_back(*feIt);
-              HalfedgeHandle heh = mesh_.halfedge_handle(*feIt,0);
+              seenEdges.push_back(*veIt);
+              HalfedgeHandle heh = mesh_.halfedge_handle(*veIt,0);
               if(linePlaneIntersection(&layerSection, heh, h))
               {
                 layerSize++;
-                //HalfedgeHandle opposite_heh = mesh_.opposite_halfedge_handle(heh);
-                std::cout << "Before currentFh \n";
-                currentFh = mesh_.opposite_face_handle(heh);
-                std::cout << "Updated currentFh \n";
-                break;
+                currentEh = *veIt;
+                edgeFound = true;
               }
-           }
-
-          //if(currentFh == previousFh)
-          //{
-            //FaceFaceIter ffIt = mesh_.ff_iter(currentFh);
-            //for(; ffIt.is_valid(); ++ffIt)
-            //{
-              //if(std::find(seenFaces.begin(), seenFaces.end(), *ffIt)!=seenFaces.end())
-                //continue;
-              
-              //seenFaces.push_back(*ffIt);
-              //currentFh = *ffIt;
-              //break;
-            //}
-          //}
-
-          //for(; ffIt.is_valid(); ++ffIt)
-          //{
-            //if(std::find(seenFaces.begin(), seenFaces.end(), *ffIt)!=seenFaces.end())
-              //continue;
-            //seenFaces.push_back(*ffIt);
-            //std::vector<Point> candidates;
-            //FaceEdgeIter feIt = mesh_.fe_iter(*ffIt);
-            //for(; feIt.is_valid(); ++feIt)
-            //{
-              //if(std::find(seenEdges.begin(), seenEdges.end(), *feIt)!=seenEdges.end())
-                //continue;
-              //HalfedgeHandle heh = mesh_.halfedge_handle(*feIt,0);
-              //if(linePlaneIntersection(&candidates, heh, h))
-              //{
-                //currentFh = *ffIt;
-                //seenEdges.push_back(*feIt);
-                //layerSize++;
-                ////break;
-              //}
-            //}
-          //}
+              if(edgeFound) break;
+            }
+            if(edgeFound) break;
+          }
         }
         layer.push_back(layerSection);
       }
       layers.push_back(layer);
       h += layer_height;
-      std::cout << "Layer " << layers.size() << " vertex no. " <<  layer.size() << "\n";
+      std::cout << "Layer " << layers.size() << " no. layer parts " <<  layer.size() << "\n";
     }
-
     return layers;
 }
 

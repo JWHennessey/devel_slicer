@@ -772,9 +772,9 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
             glVertex3f(toolpath[i][k][j-1][0], toolpath[i][k][j-1][1], toolpath[i][k][j-1][2]);
             glVertex3f(toolpath[i][k][j][0], toolpath[i][k][j][1], toolpath[i][k][j][2]);
           }
-          //int end = toolpath[i][k].size() - 1;
-          //glVertex3f(toolpath[i][k][end][0], toolpath[i][k][end][1], toolpath[i][k][end][2]);
-          //glVertex3f(toolpath[i][k][0][0], toolpath[i][k][0][1], toolpath[i][k][0][2]);
+          int end = toolpath[i][k].size() - 1;
+          glVertex3f(toolpath[i][k][end][0], toolpath[i][k][end][1], toolpath[i][k][end][2]);
+          glVertex3f(toolpath[i][k][0][0], toolpath[i][k][0][1], toolpath[i][k][0][2]);
         }
       }
       glEnd();

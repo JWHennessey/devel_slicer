@@ -41,6 +41,8 @@ public:
   typedef typename Mesh::FaceIter FaceIter;
   typedef typename Mesh::FaceEdgeIter FaceEdgeIter;
   typedef typename Mesh::FaceFaceIter FaceFaceIter;
+  typedef typename Mesh::FaceVertexIter FaceVertexIter;
+  typedef typename Mesh::VertexEdgeIter VertexEdgeIter;
   typedef typename Mesh::EdgeIter EdgeIter;
   typedef typename Mesh::HalfedgeHandle HalfedgeHandle;
   typedef typename Mesh::VertexHandle VertexHandle;
