@@ -1,11 +1,18 @@
 #ifndef SLICERT_HH
 #define SLICERT_HH
 
+#include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <OpenMesh/Core/IO/MeshIO.hh>
 #include <OpenMesh/Core/IO/Options.hh>
 #include <OpenMesh/Core/Mesh/Attributes.hh>
 #include "Eigen/Dense"
+#include <unordered_map>
+#include <boost/config.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
 
+
+using namespace boost;
 
 template <typename M>
 class IntersectionT
@@ -29,6 +36,14 @@ private:
   typename M::VertexHandle getTo(){ return to; };
 
 };
+
+
+struct Vertex
+{
+  OpenMesh::TriMesh_ArrayKernelT<OpenMesh::DefaultTraits>::Point intersection;
+  int edgeId;
+};
+
 
 
 template <typename M>

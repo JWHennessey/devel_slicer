@@ -82,10 +82,11 @@ SlicerT<M>::getToolpath()
     for(int i = 0; i < iters; i++)
     {
       std::vector<std::vector<Point> > layer;
+      std::unordered_multimap<int,int> connectivityLookup;
+      typedef adjacency_list < vecS, vecS, undirectedS, Vertex, no_property > UndirectedGraph;
+      UndirectedGraph graph;
+      std::unordered_map<int, UndirectedGraph::vertex_descriptor> vertexMapper;
       std::vector<Point> intersections;
-      std::vector<EdgeHandle> seenEdges;
-      std::vector<EdgeHandle> toVisitEdges;
-      size_t layerSize = 0;
 
       EdgeIter eIt(mesh_.edges_begin());
       EdgeIter eEnd(mesh_.edges_end());
@@ -94,64 +95,60 @@ SlicerT<M>::getToolpath()
         HalfedgeHandle heh = mesh_.halfedge_handle(*eIt,0);
         if(linePlaneIntersection(&intersections, heh, h))
         {
-          toVisitEdges.push_back(*eIt);
+          UndirectedGraph::vertex_descriptor v = add_vertex(graph);
+          graph[v].intersection = intersections.back();
+          EdgeHandle eh = *eIt;
+          graph[v].edgeId = eh.idx();;
+          std::pair<int,int> pair1 (mesh_.face_handle(heh).idx(), graph[v].edgeId);
+          connectivityLookup.insert(pair1);
+          std::pair<int,int> pair2 (mesh_.opposite_face_handle(heh).idx(), graph[v].edgeId);
+          connectivityLookup.insert(pair2);
+
+          std::pair<int,UndirectedGraph::vertex_descriptor> pair3 (graph[v].edgeId, v);
+          vertexMapper.insert(pair3);
         }
       }
 
-      //delete intersections;
-
-      EdgeHandle currentEh;
-      EdgeHandle previousEh;
-
-      //Find the first edge at this height
-      while(layerSize < toVisitEdges.size())
+      for ( unsigned k = 0; k < connectivityLookup.bucket_count(); ++k) 
       {
-        std::vector<Point> layerSection;
-        size_t i = 0;
-        for(; i < toVisitEdges.size(); i++)
+        int j = 0;
+        for ( auto local_it = connectivityLookup.begin(k); 
+            local_it!= connectivityLookup.end(k); ++local_it )
         {
-          currentEh = toVisitEdges.at(i);
-          if(std::find(seenEdges.begin(), seenEdges.end(), currentEh)!=seenEdges.end())
-            continue;
-          seenEdges.push_back(currentEh);
-          HalfedgeHandle heh = mesh_.halfedge_handle(currentEh,0);
-          linePlaneIntersection(&layerSection, heh, h);
-          layerSize++;
-          break;
-        }
-
-        while(true)
-        {
-          if(currentEh == previousEh) break;
-
-          previousEh = currentEh;
-
-          HalfedgeHandle heh = mesh_.halfedge_handle(currentEh,0);
-          std::vector<VertexHandle> vhs;
-          vhs.push_back(mesh_.from_vertex_handle(heh));
-          vhs.push_back(mesh_.to_vertex_handle(heh));
-          bool edgeFound = false;
-          for(size_t i = 0; i < vhs.size(); i++)
+          for ( auto inner_local_it = connectivityLookup.begin(k); 
+              inner_local_it!= connectivityLookup.end(k); ++inner_local_it )
           {
-            VertexEdgeIter veIt = mesh_.ve_iter(vhs.at(i));
-            for(; veIt.is_valid(); ++veIt)
+            if(local_it != inner_local_it)
             {
-              if(std::find(seenEdges.begin(), seenEdges.end(), *veIt)!=seenEdges.end())
-                continue;
-              seenEdges.push_back(*veIt);
-              HalfedgeHandle heh = mesh_.halfedge_handle(*veIt,0);
-              if(linePlaneIntersection(&layerSection, heh, h))
-              {
-                layerSize++;
-                currentEh = *veIt;
-                edgeFound = true;
-              }
-              //if(edgeFound) break;
+              UndirectedGraph::vertex_descriptor from = vertexMapper.find(local_it->second)->second;
+              UndirectedGraph::vertex_descriptor to = vertexMapper.find(inner_local_it->second)->second;
+              if(!edge(from, to, graph).second)
+                add_edge(from, to, graph);
             }
-            //if(edgeFound) break;
           }
+          j++;
         }
-        layer.push_back(layerSection);
+      }
+
+      //std::vector<int> component(num_vertices(graph));
+      //int num = connected_components(graph, &component[0]);
+
+
+      typedef property_map<UndirectedGraph, vertex_index_t>::type IndexMap;
+      IndexMap index = get(vertex_index, graph);
+
+      typedef graph_traits<UndirectedGraph>::vertex_iterator vertex_iter;
+      typedef graph_traits<UndirectedGraph>::adjacency_iterator adjacency_iter;
+      std::pair<vertex_iter, vertex_iter> vp;
+      for (vp = vertices(graph); vp.first != vp.second; ++vp.first)
+      {
+        std::pair<adjacency_iter, adjacency_iter> ap;
+        std::cout << index[*vp.first] <<  " : ";
+        for(ap = adjacent_vertices(index[*vp.first], graph); ap.first != ap.second; ++ ap.first)
+        {
+          std::cout << index[*ap.first] << " ";
+        }
+        std::cout << "\n";
       }
       layers.push_back(layer);
       h += layer_height;
