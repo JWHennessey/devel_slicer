@@ -64,9 +64,108 @@ SlicerT<M>::linePlaneIntersection(std::vector<Point> *layer, HalfedgeHandle heh,
     return false;
 }
 
+
 template <typename M>
 std::vector<std::vector<std::vector<typename M::Point > > >
 SlicerT<M>::getToolpath()
+{
+
+    float zMin, zMax;
+    std::pair <float, float> zAxisBoundry = zAxisMinMax();
+    zMin = zAxisBoundry.first;
+    zMax = zAxisBoundry.second;
+
+    float diff = zMax - zMin;
+    float h = zMin;
+    int iters = diff / layer_height;
+
+    //h += layer_height;
+    for(int i = 0; i < iters; i++)
+    {
+      std::vector<std::vector<Point> > layer;
+      std::vector<Point> intersections;
+      std::vector<EdgeHandle> seenEdges;
+      std::vector<EdgeHandle> toVisitEdges;
+      size_t layerSize = 0;
+
+      EdgeIter eIt(mesh_.edges_begin());
+      EdgeIter eEnd(mesh_.edges_end());
+      for(eIt; eIt!=eEnd; eIt++)
+      {
+        HalfedgeHandle heh = mesh_.halfedge_handle(*eIt,0);
+        if(linePlaneIntersection(&intersections, heh, h))
+        {
+          toVisitEdges.push_back(*eIt);
+        }
+      }
+
+      //delete intersections;
+
+      EdgeHandle currentEh;
+      EdgeHandle previousEh;
+
+      //Find the first edge at this height
+      while(layerSize < toVisitEdges.size())
+      {
+        std::vector<Point> layerSection;
+        size_t i = 0;
+        for(; i < toVisitEdges.size(); i++)
+        {
+          currentEh = toVisitEdges.at(i);
+          if(std::find(seenEdges.begin(), seenEdges.end(), currentEh)!=seenEdges.end())
+            continue;
+          seenEdges.push_back(currentEh);
+          HalfedgeHandle heh = mesh_.halfedge_handle(currentEh,0);
+          linePlaneIntersection(&layerSection, heh, h);
+          layerSize++;
+          break;
+        }
+
+        while(true)
+        {
+          if(currentEh == previousEh) break;
+
+          previousEh = currentEh;
+
+          HalfedgeHandle heh = mesh_.halfedge_handle(currentEh,0);
+          std::vector<VertexHandle> vhs;
+          vhs.push_back(mesh_.from_vertex_handle(heh));
+          vhs.push_back(mesh_.to_vertex_handle(heh));
+          bool edgeFound = false;
+          for(size_t i = 0; i < vhs.size(); i++)
+          {
+            VertexEdgeIter veIt = mesh_.ve_iter(vhs.at(i));
+            for(; veIt.is_valid(); ++veIt)
+            {
+              if(std::find(seenEdges.begin(), seenEdges.end(), *veIt)!=seenEdges.end())
+                continue;
+              seenEdges.push_back(*veIt);
+              HalfedgeHandle heh = mesh_.halfedge_handle(*veIt,0);
+              if(linePlaneIntersection(&layerSection, heh, h))
+              {
+                layerSize++;
+                currentEh = *veIt;
+                edgeFound = true;
+              }
+              if(edgeFound) break;
+            }
+            if(edgeFound) break;
+          }
+        }
+        layer.push_back(layerSection);
+      }
+      layers.push_back(layer);
+      h += layer_height;
+      std::cout << "Layer " << layers.size() << " no. layer parts " <<  layer.size() << "\n";
+    }
+    return layers;
+}
+
+
+
+template <typename M>
+std::vector<std::vector<std::vector<typename M::Point > > >
+SlicerT<M>::getToolpathGraph()
 {
 
     float zMin, zMax;
@@ -87,6 +186,7 @@ SlicerT<M>::getToolpath()
       UndirectedGraph graph;
       std::unordered_map<int, UndirectedGraph::vertex_descriptor> vertexMapper;
       std::vector<Point> intersections;
+      std::vector<UndirectedGraph::vertex_descriptor> toVisitVerticies;
 
       EdgeIter eIt(mesh_.edges_begin());
       EdgeIter eEnd(mesh_.edges_end());
@@ -99,6 +199,7 @@ SlicerT<M>::getToolpath()
           graph[v].intersection = intersections.back();
           EdgeHandle eh = *eIt;
           graph[v].edgeId = eh.idx();;
+          
           std::pair<int,int> pair1 (mesh_.face_handle(heh).idx(), graph[v].edgeId);
           connectivityLookup.insert(pair1);
           std::pair<int,int> pair2 (mesh_.opposite_face_handle(heh).idx(), graph[v].edgeId);
@@ -106,6 +207,7 @@ SlicerT<M>::getToolpath()
 
           std::pair<int,UndirectedGraph::vertex_descriptor> pair3 (graph[v].edgeId, v);
           vertexMapper.insert(pair3);
+          toVisitVerticies.push_back(v);
         }
       }
 
@@ -130,26 +232,34 @@ SlicerT<M>::getToolpath()
         }
       }
 
-      //std::vector<int> component(num_vertices(graph));
-      //int num = connected_components(graph, &component[0]);
 
-
-      typedef property_map<UndirectedGraph, vertex_index_t>::type IndexMap;
-      IndexMap index = get(vertex_index, graph);
-
-      typedef graph_traits<UndirectedGraph>::vertex_iterator vertex_iter;
-      typedef graph_traits<UndirectedGraph>::adjacency_iterator adjacency_iter;
-      std::pair<vertex_iter, vertex_iter> vp;
-      for (vp = vertices(graph); vp.first != vp.second; ++vp.first)
+      std::vector<UndirectedGraph::vertex_descriptor> seenVerticies;
+      while(!toVisitVerticies.empty())
       {
-        std::pair<adjacency_iter, adjacency_iter> ap;
-        std::cout << index[*vp.first] <<  " : ";
-        for(ap = adjacent_vertices(index[*vp.first], graph); ap.first != ap.second; ++ ap.first)
+        std::vector<Point> layerSection;
+        UndirectedGraph::vertex_descriptor v = toVisitVerticies.back();
+        toVisitVerticies.pop_back();
+        while(std::find(seenVerticies.begin(), seenVerticies.end(), v)==seenVerticies.end())
         {
-          std::cout << index[*ap.first] << " ";
+          layerSection.push_back(graph[v].intersection);
+          seenVerticies.push_back(v);
+          typename graph_traits<UndirectedGraph>::out_edge_iterator out_i, out_end;
+          typename graph_traits<UndirectedGraph>::edge_descriptor e;
+          int c = 0;
+          for (tie(out_i, out_end) = out_edges(v, graph);
+               out_i != out_end; ++out_i)
+          {
+            e = *out_i;
+            v = target(e, graph);
+            c++;
+            if(std::find(seenVerticies.begin(), seenVerticies.end(), v)==seenVerticies.end()) break;
+          }
+          //std::cout << "Edge Count: " << c << "\n";;
         }
-        std::cout << "\n";
+        if(layerSection.size() > 0)
+          layer.push_back(layerSection);
       }
+
       layers.push_back(layer);
       h += layer_height;
       std::cout << "Layer " << layers.size() << " no. layer parts " <<  layer.size() << "\n";

@@ -65,6 +65,7 @@ public:
   typedef typename Mesh::EdgeHandle EdgeHandle;
   SlicerT<M>(M m, double lh);
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpath();
+  std::vector<std::vector<std::vector<typename M::Point > > > getToolpathGraph();
 
 private:
   Mesh mesh_;

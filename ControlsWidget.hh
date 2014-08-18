@@ -21,6 +21,7 @@ public:
   
 public slots:
   void slice();
+  void sliceAlt();
   void setLayerHeight(int value);
   void setLineNumber(int value);
   void rotateX();
@@ -31,6 +32,7 @@ private:
   MeshViewerWidget* meshViewer;
   QDoubleSpinBox* layerHeightSpinBox;
   QPushButton* sliceBtn;
+  QPushButton* sliceBtnAlt;
   QPushButton* rotateXBtn;
   QPushButton* rotateYBtn;
   QPushButton* rotateZBtn;

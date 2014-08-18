@@ -154,6 +154,25 @@ MeshViewerWidgetT<M>::setLineNumber(int value)
   updateGL();
 }
 
+
+template <typename M>
+void 
+MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight)
+{
+   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight);
+   toolpath = slicer.getToolpathGraph();
+   layerHeight = toolpath.size();
+   lineNumber = getLineNumber();
+   QAction *a = findAction("Gcode");
+   a->setChecked(true);
+   slotDrawMode(a);
+
+
+   //draw_mode_ = 0;
+   //draw_openmesh("Gcode");
+}
+
+
 template <typename M>
 void 
 MeshViewerWidgetT<M>::slice_mesh(double layerHeight)
@@ -760,6 +779,7 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
         //}
       //}
 
+      //std::cout << "G-code render\n";
       // if you have command slider for(int i=0; i < (layerHeight - 1); i++)
       for(int i=0; i < layerHeight; i++)
       {

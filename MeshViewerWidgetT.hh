@@ -91,6 +91,7 @@ public:
 
 
   virtual void slice_mesh(double layerHeight);
+  virtual void slice_mesh_alt(double layerHeight);
   int getLayerCount();
   int getLineNumber();
   void rotateX(int deg);

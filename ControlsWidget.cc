@@ -50,6 +50,9 @@ void ControlsWidget::addControls()
   sliceBtn = new QPushButton("Slice Mesh");
   vlay->addWidget(sliceBtn);
 
+  sliceBtnAlt = new QPushButton("Slice Mesh Alt");
+  vlay->addWidget(sliceBtnAlt);
+
   layerSlider = new QSlider();
   layerSlider->setMaximumHeight(200);
   layerSlider->setHidden(true);
@@ -66,6 +69,7 @@ void ControlsWidget::addControls()
 void ControlsWidget::addActions()
 {
   connect(sliceBtn, SIGNAL(clicked()),this, SLOT(slice()));
+  connect(sliceBtnAlt, SIGNAL(clicked()),this, SLOT(sliceAlt()));
   connect(rotateXBtn, SIGNAL(clicked()),this, SLOT(rotateX()));
   connect(rotateYBtn, SIGNAL(clicked()),this, SLOT(rotateY()));
   connect(rotateZBtn, SIGNAL(clicked()),this, SLOT(rotateZ()));
@@ -84,11 +88,18 @@ void ControlsWidget::slice()
   layerSlider->setRange(0, count);
   layerSlider->setSliderPosition(count);
   layerSlider->setHidden(false);
+}
 
-  //int lineNo = meshViewer->getLineNumber();
-  //lineSlider->setRange(1, lineNo);
-  //lineSlider->setSliderPosition(lineNo);
-  //lineSlider->setHidden(false);
+
+void ControlsWidget::sliceAlt()
+{
+  double layerHeight = layerHeightSpinBox->value();
+  meshViewer->slice_mesh_alt(layerHeight);
+
+  int count = meshViewer->getLayerCount();
+  layerSlider->setRange(0, count);
+  layerSlider->setSliderPosition(count);
+  layerSlider->setHidden(false);
 }
 
 void ControlsWidget::setLayerHeight(int value)
