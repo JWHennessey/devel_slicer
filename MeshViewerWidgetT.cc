@@ -70,6 +70,46 @@ using namespace Qt;
 using namespace Qt;
 //== IMPLEMENTATION ========================================================== 
 
+template <typename M>
+void
+MeshViewerWidgetT<M>::toggleDisplay1()
+{
+  displayPath = true;
+  displayPoints = true;
+  displayCurvature = false;
+  updateGL();
+}
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::toggleDisplay2()
+{
+  displayPath = false;
+  displayPoints = true;
+  displayCurvature = false;
+  updateGL();
+}
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::toggleDisplay3()
+{
+  displayPath = true;
+  displayPoints = false;
+  displayCurvature = false;
+  updateGL();
+}
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::toggleDisplay4()
+{
+  displayPath = false;
+  displayPoints = false;
+  displayCurvature = true;
+  updateGL();
+}
+
 
 template <typename M>
 void
@@ -134,6 +174,14 @@ MeshViewerWidgetT<M>::getLineNumber()
 }
 
 
+template <typename M>
+void
+MeshViewerWidgetT<M>::completeLoopToggle(bool value)
+{
+  completeLoop = value;
+  std::cout << "completeLoopToggle" << std::endl;
+}
+
 
 template <typename M>
 void
@@ -159,14 +207,13 @@ template <typename M>
 void 
 MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight)
 {
-   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight);
+   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, completeLoop);
    toolpath = slicer.getToolpathGraph();
    layerHeight = toolpath.size();
    lineNumber = getLineNumber();
    QAction *a = findAction("Gcode");
    a->setChecked(true);
    slotDrawMode(a);
-
 
    //draw_mode_ = 0;
    //draw_openmesh("Gcode");
@@ -177,7 +224,7 @@ template <typename M>
 void 
 MeshViewerWidgetT<M>::slice_mesh(double layerHeight)
 {
-   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight);
+   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, completeLoop);
    toolpath = slicer.getToolpath();
    layerHeight = toolpath.size();
    lineNumber = getLineNumber();
@@ -206,20 +253,23 @@ QDialog
 template <typename M>
 MeshViewerWidgetT<M>::MeshViewerWidgetT(QWidget* _parent)
     : QGLViewerWidget(_parent),
-      f_strips_(false), 
+    completeLoop(false),  
+    f_strips_(false), 
       tex_id_(0),
       tex_mode_(GL_MODULATE),
       strips_(mesh_),
       use_color_(true),
       show_vnormals_(false),
-      show_fnormals_(false)
+      show_fnormals_(false),
+      displayPath(true),
+      displayPoints(true),
+      displayCurvature(false)
 {
     add_draw_mode("Points");
     add_draw_mode("Hidden-Line");
 #if defined(OM_USE_OSG) && OM_USE_OSG
     add_draw_mode("OpenSG Indices");
 #endif
-
 
     std::cout << "MeshViewWidgetT Init \n";
     //QWidget *controls = createDialog(tr("Controls"));
@@ -745,57 +795,63 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
     else
     {
 
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glColor3f(1.0, 0.0, 0.0);
-      for(int j=0; j < layerHeight; j++)
+      if(displayPoints)
       {
-        for(size_t i=0; i < toolpath[j].size(); i++)
-        {  
-          glVertexPointer(3, GL_FLOAT, 0, &toolpath[j][i][0]);
-          glPointSize(2.0f);
-          glDrawArrays( GL_POINTS, 0, static_cast<GLsizei>(toolpath[j][i].size()) );
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glColor3f(1.0, 0.0, 0.0);
+        for(int j=0; j < layerHeight; j++)
+        {
+          for(size_t i=0; i < toolpath[j].size(); i++)
+          {  
+            glVertexPointer(3, GL_FLOAT, 0, &toolpath[j][i][0]);
+            glPointSize(2.0f);
+            glDrawArrays( GL_POINTS, 0, static_cast<GLsizei>(toolpath[j][i].size()) );
+          }
+        }
+        glDisableClientState(GL_VERTEX_ARRAY);
+      }
+      if(displayPath)
+      {
+        glLineWidth(1.0); 
+        glColor3f(1.0, 1.0, 1.0);
+        glBegin(GL_LINES);
+
+        //Render the top most layer acouding to the line number
+        //if(layerHeight > 0)
+        //{
+          //int k = 0;
+          //int nextLayerThreshold = toolpath[layerHeight-1][k].size();
+          //for(int j=1; j < lineNumber; j++)
+          //{
+            //if(j == nextLayerThreshold)
+            //{
+              //k++;
+              //nextLayerThreshold = toolpath[layerHeight-1][k].size();
+            //}
+            //glVertex3f(toolpath[layerHeight - 1][k][j-1][0], toolpath[layerHeight - 1][k][j-1][1], toolpath[layerHeight - 1][k][j-1][2]);
+            //glVertex3f(toolpath[layerHeight - 1][k][j][0], toolpath[layerHeight - 1][k][j][1], toolpath[layerHeight - 1][k][j][2]);
+          //}
+        //}
+
+        //std::cout << "G-code render\n";
+        // if you have command slider for(int i=0; i < (layerHeight - 1); i++)
+        for(int i=0; i < layerHeight; i++)
+        {
+          for(size_t k=0; k < toolpath[i].size(); k++)
+          {
+            //std::cout << "Inside K Loop \n";
+            for(size_t j=1; j < toolpath[i][k].size(); j++)
+            {
+              //std::cout << "Inside J Loop \n";
+              glVertex3f(toolpath[i][k][j-1][0], toolpath[i][k][j-1][1], toolpath[i][k][j-1][2]);
+              glVertex3f(toolpath[i][k][j][0], toolpath[i][k][j][1], toolpath[i][k][j][2]);
+            }
+          }
         }
       }
-      glDisableClientState(GL_VERTEX_ARRAY);
-
-      glLineWidth(1.0); 
-      glColor3f(1.0, 1.0, 1.0);
-      glBegin(GL_LINES);
-
-      //Render the top most layer acouding to the line number
-      //if(layerHeight > 0)
-      //{
-        //int k = 0;
-        //int nextLayerThreshold = toolpath[layerHeight-1][k].size();
-        //for(int j=1; j < lineNumber; j++)
-        //{
-          //if(j == nextLayerThreshold)
-          //{
-            //k++;
-            //nextLayerThreshold = toolpath[layerHeight-1][k].size();
-          //}
-          //glVertex3f(toolpath[layerHeight - 1][k][j-1][0], toolpath[layerHeight - 1][k][j-1][1], toolpath[layerHeight - 1][k][j-1][2]);
-          //glVertex3f(toolpath[layerHeight - 1][k][j][0], toolpath[layerHeight - 1][k][j][1], toolpath[layerHeight - 1][k][j][2]);
-        //}
-      //}
-
-      //std::cout << "G-code render\n";
-      // if you have command slider for(int i=0; i < (layerHeight - 1); i++)
-      for(int i=0; i < layerHeight; i++)
+      if(displayCurvature)
       {
-        for(size_t k=0; k < toolpath[i].size(); k++)
-        {
-          //std::cout << "Inside K Loop \n";
-          for(size_t j=1; j < toolpath[i][k].size(); j++)
-          {
-            //std::cout << "Inside J Loop \n";
-            glVertex3f(toolpath[i][k][j-1][0], toolpath[i][k][j-1][1], toolpath[i][k][j-1][2]);
-            glVertex3f(toolpath[i][k][j][0], toolpath[i][k][j][1], toolpath[i][k][j][2]);
-          }
-          int end = toolpath[i][k].size() - 1;
-          glVertex3f(toolpath[i][k][end][0], toolpath[i][k][end][1], toolpath[i][k][end][2]);
-          glVertex3f(toolpath[i][k][0][0], toolpath[i][k][0][1], toolpath[i][k][0][2]);
-        }
+        std::cout << "Not ready yet" << std::endl;
       }
       glEnd();
     }

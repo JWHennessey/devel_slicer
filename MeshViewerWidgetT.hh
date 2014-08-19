@@ -97,6 +97,11 @@ public:
   void rotateX(int deg);
   void rotateY(int deg);
   void rotateZ(int deg);
+  void completeLoopToggle(bool value);
+  void toggleDisplay1();
+  void toggleDisplay2();
+  void toggleDisplay3();
+  void toggleDisplay4();
 
   /// open mesh
   virtual bool open_mesh(const char* _filename, OpenMesh::IO::Options _opt);
@@ -116,7 +121,7 @@ public:
   const Mesh& mesh() const { return mesh_; }
   
 protected:
-  
+  bool completeLoop;
   ////s inherited drawing method
   virtual void draw_scene(const std::string& _draw_mode);
   
@@ -176,7 +181,9 @@ protected: // inherited
   virtual void keyPressEvent( QKeyEvent* _event);
 
 protected:
-   
+  bool                   displayPath;
+  bool                   displayPoints;
+  bool                   displayCurvature;
   bool                   f_strips_; // enable/disable strip usage
   GLuint                 tex_id_;
   GLint                  tex_mode_;

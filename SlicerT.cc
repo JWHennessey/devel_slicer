@@ -1,10 +1,11 @@
 #define SLICERT_CC
 
 template <typename M>
-SlicerT<M>::SlicerT(M m, double lh)
+SlicerT<M>::SlicerT(M m, double lh, bool cl) : 
+  completeLoop(cl),
+  layer_height(lh)
 {
   mesh_ = m;
-  layer_height = lh;
 }
 
 template <typename M>
@@ -152,7 +153,13 @@ SlicerT<M>::getToolpath()
             if(edgeFound) break;
           }
         }
-        layer.push_back(layerSection);
+        if(layerSection.size() > 0)
+        {  
+          std::vector<Point> newLayerSection;
+          resampleLayerSection(&layerSection, &newLayerSection);
+          std::cout << "Updated layerSection: " << newLayerSection.size() << std::endl;
+          layer.push_back(newLayerSection);
+        }
       }
       layers.push_back(layer);
       h += layer_height;
@@ -257,7 +264,13 @@ SlicerT<M>::getToolpathGraph()
           //std::cout << "Edge Count: " << c << "\n";;
         }
         if(layerSection.size() > 0)
-          layer.push_back(layerSection);
+        {  
+          
+          std::vector<Point> newLayerSection;
+          resampleLayerSection(&layerSection, &newLayerSection);
+          std::cout << "Updated layerSection: " << newLayerSection.size() << std::endl;
+          layer.push_back(newLayerSection);
+        }
       }
 
       layers.push_back(layer);
@@ -270,31 +283,34 @@ SlicerT<M>::getToolpathGraph()
 
 template <typename M>
 void
-SlicerT<M>::resampleLayerSection(std::vector<Point>* layerSection)
+SlicerT<M>::resampleLayerSection(std::vector<Point>* layerSection, std::vector<Point>* newLayerSection)
 {
-  //std::vector<Point> newLayerSection;
-  //for(size_t i = 1; i < layerSection->size(); i++)
-  //{
-    //double distCount = 0.0;
-    //size_t pointsAdded = 0;
+  if(completeLoop)
+  {
+    Point p(layerSection->at(0));
+    layerSection->push_back(p);
+  }
+  for(size_t i = 1; i < layerSection->size(); i++)
+  {
+    double distCount = 0.0;
+    size_t pointsAdded = 1;
 
-    //Point a = layerSection->at(i-1);
-    //Point b = layerSection->at(i);
-    //Point direction = b - a;
-    //Eigen::Vector3d aVec(a[0], a[1], a[2]);
+    Point a = layerSection->at(i-1);
+    Point b = layerSection->at(i);
+    Point direction = b - a;
+    Eigen::Vector3d aVec(a[0], a[1], a[2]);
 
-    //Eigen::Vector3d d(direction[0], direction[1], direction[2]);
-    //int iters = d.norm() / 0.1;
-    ////Point c = a + (b - a) * 0.1;
-    //newLayerSection.push_back(a);
-    //for(int j = 1; j < iters; j++)
-    //{
-      //Eigen::Vector3d xVec = aVec + (j * d);
-      //Point x(xVec[0], xVec[1],xVec[2]);
-      //newLayerSection.push_back(x);
-    //}
-    //newLayerSection.push_back(b);
-  //}
-  //layerSection = &newLayerSection;
+    Eigen::Vector3d d(direction[0], direction[1], direction[2]);
+    int iters = d.norm() / layer_height;
+    newLayerSection->push_back(a);
+
+    for(int j = 1; j < iters; j++)
+    {
+      Eigen::Vector3d xVec = aVec + ((d / iters) * j);
+      Point x(xVec[0], xVec[1],xVec[2]);
+      newLayerSection->push_back(x);
+    }
+    newLayerSection->push_back(b);
+  }
 }
 

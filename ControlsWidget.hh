@@ -8,7 +8,8 @@
 #include <QLabel>
 #include <QSlider>
 #include <QDoubleSpinBox>
-
+#include <QRadioButton>
+#include <QGroupBox>
 #include "MeshViewerWidget.hh"
 
 //class MeshViewerWidget;
@@ -27,6 +28,11 @@ public slots:
   void rotateX();
   void rotateY();
   void rotateZ();
+  void completeLoopToggle();
+  void toggleRadio1();
+  void toggleRadio2();
+  void toggleRadio3();
+  void toggleRadio4();
 
 private:
   MeshViewerWidget* meshViewer;
@@ -36,10 +42,16 @@ private:
   QPushButton* rotateXBtn;
   QPushButton* rotateYBtn;
   QPushButton* rotateZBtn;
+  QRadioButton* completeLoopBtn;
   QSlider* layerSlider;
   QSlider* lineSlider;
   void addActions();
   void addControls();
+  QRadioButton *radio1;
+  QRadioButton *radio2;
+  QRadioButton *radio3;
+  QRadioButton *radio4;
+  QGroupBox *groupBox;
 
 
 };

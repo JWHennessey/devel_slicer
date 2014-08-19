@@ -47,6 +47,10 @@ void ControlsWidget::addControls()
   layerHeightSpinBox->setValue(0.1);
   vlay->addWidget(layerHeightSpinBox);
 
+
+  completeLoopBtn = new QRadioButton("Complete Loop", this);
+  vlay->addWidget(completeLoopBtn);
+
   sliceBtn = new QPushButton("Slice Mesh");
   vlay->addWidget(sliceBtn);
 
@@ -57,6 +61,25 @@ void ControlsWidget::addControls()
   layerSlider->setMaximumHeight(200);
   layerSlider->setHidden(true);
   vlay->addWidget(layerSlider);
+
+
+
+  groupBox = new QGroupBox(tr("Render Style"));
+
+  radio1 = new QRadioButton(tr("Path and Points"));
+  radio2 = new QRadioButton(tr("Points Only"));
+  radio3 = new QRadioButton(tr("Path Only"));
+  radio4 = new QRadioButton(tr("Curvature"));
+  radio1->setChecked(true);
+  QVBoxLayout *vbox = new QVBoxLayout;
+  vbox->addWidget(radio1);
+  vbox->addWidget(radio2);
+  vbox->addWidget(radio3);
+  vbox->addWidget(radio4);
+  vbox->addStretch(1);
+  groupBox->setLayout(vbox);
+  vlay->addWidget(groupBox);
+  groupBox->setHidden(true);
 
   //lineSlider = new QSlider(Qt::Horizontal);
   //lineSlider->setMaximumHeight(200);
@@ -70,13 +93,41 @@ void ControlsWidget::addActions()
 {
   connect(sliceBtn, SIGNAL(clicked()),this, SLOT(slice()));
   connect(sliceBtnAlt, SIGNAL(clicked()),this, SLOT(sliceAlt()));
+  connect(completeLoopBtn, SIGNAL(clicked()),this, SLOT(completeLoopToggle()));
   connect(rotateXBtn, SIGNAL(clicked()),this, SLOT(rotateX()));
   connect(rotateYBtn, SIGNAL(clicked()),this, SLOT(rotateY()));
   connect(rotateZBtn, SIGNAL(clicked()),this, SLOT(rotateZ()));
   connect(layerSlider, SIGNAL(valueChanged(int)),
              this, SLOT(setLayerHeight(int)));
-  //connect(lineSlider, SIGNAL(valueChanged(int)),
-             //this, SLOT(setLineNumber(int)));
+  connect(radio1, SIGNAL(clicked()),this, SLOT(toggleRadio1()));
+  connect(radio2, SIGNAL(clicked()),this, SLOT(toggleRadio2()));
+  connect(radio3, SIGNAL(clicked()),this, SLOT(toggleRadio3()));
+  connect(radio4, SIGNAL(clicked()),this, SLOT(toggleRadio4()));
+}
+
+
+void ControlsWidget::toggleRadio1()
+{
+  meshViewer->toggleDisplay1();
+}
+
+void ControlsWidget::toggleRadio2()
+{
+  meshViewer->toggleDisplay2();
+
+}
+void ControlsWidget::toggleRadio3()
+{
+  meshViewer->toggleDisplay3();
+
+}
+void ControlsWidget::toggleRadio4()
+{
+  meshViewer->toggleDisplay4();
+}
+void ControlsWidget::completeLoopToggle()
+{
+  meshViewer->completeLoopToggle(completeLoopBtn->isChecked());
 }
 
 void ControlsWidget::slice()
@@ -88,6 +139,7 @@ void ControlsWidget::slice()
   layerSlider->setRange(0, count);
   layerSlider->setSliderPosition(count);
   layerSlider->setHidden(false);
+  groupBox->setHidden(false);
 }
 
 
@@ -100,6 +152,7 @@ void ControlsWidget::sliceAlt()
   layerSlider->setRange(0, count);
   layerSlider->setSliderPosition(count);
   layerSlider->setHidden(false);
+  groupBox->setHidden(false);
 }
 
 void ControlsWidget::setLayerHeight(int value)
