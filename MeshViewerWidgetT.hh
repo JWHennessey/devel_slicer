@@ -199,6 +199,7 @@ protected:
 
   // My Code
   std::vector<std::vector<std::vector<typename Mesh::Point> > > toolpath;
+  std::vector<std::vector<std::vector<typename Mesh::Point> > > curvature;
   QDialog *createDialog(const QString &windowTitle) const;
   int layerHeight;
   int lineNumber;

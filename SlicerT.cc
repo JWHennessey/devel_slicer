@@ -84,6 +84,7 @@ SlicerT<M>::getToolpath()
     for(int i = 0; i < iters; i++)
     {
       std::vector<std::vector<Point> > layer;
+      std::vector<std::vector<Point> > layerCurvature;
       std::vector<Point> intersections;
       std::vector<EdgeHandle> seenEdges;
       std::vector<EdgeHandle> toVisitEdges;
@@ -157,10 +158,12 @@ SlicerT<M>::getToolpath()
         {  
           std::vector<Point> newLayerSection;
           resampleLayerSection(&layerSection, &newLayerSection);
-          std::cout << "Updated layerSection: " << newLayerSection.size() << std::endl;
+          std::vector<Point> layerSectionCurvature = computeLayerSectionCurvature(newLayerSection);
+          layerCurvature.push_back(layerSectionCurvature);
           layer.push_back(newLayerSection);
         }
       }
+      curvature.push_back(layerCurvature);
       layers.push_back(layer);
       h += layer_height;
       std::cout << "Layer " << layers.size() << " no. layer parts " <<  layer.size() << "\n";
@@ -188,6 +191,7 @@ SlicerT<M>::getToolpathGraph()
     for(int i = 0; i < iters; i++)
     {
       std::vector<std::vector<Point> > layer;
+      std::vector<std::vector<Point> > layerCurvature;
       std::unordered_multimap<int,int> connectivityLookup;
       typedef adjacency_list < vecS, vecS, undirectedS, Vertex, no_property > UndirectedGraph;
       UndirectedGraph graph;
@@ -206,7 +210,7 @@ SlicerT<M>::getToolpathGraph()
           graph[v].intersection = intersections.back();
           EdgeHandle eh = *eIt;
           graph[v].edgeId = eh.idx();;
-          
+
           std::pair<int,int> pair1 (mesh_.face_handle(heh).idx(), graph[v].edgeId);
           connectivityLookup.insert(pair1);
           std::pair<int,int> pair2 (mesh_.opposite_face_handle(heh).idx(), graph[v].edgeId);
@@ -264,15 +268,15 @@ SlicerT<M>::getToolpathGraph()
           //std::cout << "Edge Count: " << c << "\n";;
         }
         if(layerSection.size() > 0)
-        {  
-          
+        {
           std::vector<Point> newLayerSection;
           resampleLayerSection(&layerSection, &newLayerSection);
-          std::cout << "Updated layerSection: " << newLayerSection.size() << std::endl;
+          std::vector<Point> layerSectionCurvature = computeLayerSectionCurvature(newLayerSection);
+          layerCurvature.push_back(layerSectionCurvature);
           layer.push_back(newLayerSection);
         }
       }
-
+      curvature.push_back(layerCurvature);
       layers.push_back(layer);
       h += layer_height;
       std::cout << "Layer " << layers.size() << " no. layer parts " <<  layer.size() << "\n";
@@ -314,3 +318,107 @@ SlicerT<M>::resampleLayerSection(std::vector<Point>* layerSection, std::vector<P
   }
 }
 
+template <typename M>
+std::vector<typename M::Point>
+SlicerT<M>::computeLayerSectionCurvature(const std::vector<Point>& layerSection)
+{
+  std::vector<double> c;
+	double max = 0.0;
+	double min = 360.0;
+  c.push_back(0.0f);
+  for (typename std::vector<Point>::const_iterator it = layerSection.begin() + 1;
+      it != layerSection.end() - 1; ++it)
+	{
+    it--;
+    Point pim1 = *it;
+    Eigen::Vector2d vim1(pim1[0], pim1[1]);
+    //std::cout << "vim1 " << vim1[0] << " " << vim1[1] << std::endl;
+
+    it++;
+    Point pi = *it;
+    Eigen::Vector2d vi(pi[0], pi[1]);
+    //std::cout << "vi " << vi[0] << " " << vi[1] << std::endl;
+
+    it++;
+    Point pip1 = *it;
+    Eigen::Vector2d vip1(pip1[0], pip1[1]);
+    //std::cout << "vim1 " << vip1[0] << " " << vip1[1] << std::endl;
+
+    it--;
+
+    Eigen::Vector2d dim1 = vi - vim1;
+    Eigen::Vector2d tim1;
+    if(dim1.norm() == 0.0)
+      tim1 = dim1;
+    else
+      tim1 = dim1 / dim1.norm();
+
+    Eigen::Vector2d di = vip1 - vi;
+    //Eigen::Vector2d ti = di / di.norm();
+    Eigen::Vector2d ti;
+    if(di.norm() == 0.0)
+      ti = di;
+    else
+      ti = di / di.norm();
+
+    //std::cout << "di: " << di[0] << " " << di[1] << std::endl;
+    //std::cout << "dim1: " << dim1[0] << " " << dim1[1] << std::endl;
+
+    //std::cout << "ti: " << ti[0] << " " << ti[1] << std::endl;
+    //std::cout << "tim1: " << tim1[0] << " " << tim1[1] << std::endl;
+
+    double numer = (ti - tim1).norm();
+    double denom = ((vip1 - vi) / 2).norm() + ((vi - vip1) / 2).norm();
+
+    double k;
+    if(denom == 0.0)
+      k = 0.0;
+    else if(numer == 0.0)
+      k = 0.0;
+    else
+    {
+      k = numer / denom;
+      if(k > max) max = k;
+      else if(k < min) min = k;
+      //std::cout << k << std::endl;
+    }
+    c.push_back(k);
+
+    //std::cout << numer << " / " << denom << " = "<< k << std::endl;
+	}
+	c.push_back(0.0f);
+
+  std::vector<Point> curve;
+  Point x(0.0f, 0.0f, 1.0f);
+  Point n(1.0f, 1.0f, 1.0f);
+
+  curve.push_back(n);
+  for (typename std::vector<double>::iterator it = c.begin() ;
+      it != c.end(); ++it)
+  {
+    if(*it > 0.0)
+    {
+      *it = (*it - min) / (max - min);
+    }
+    Point p(*it, 0.0f, (1.0f - *it));
+    curve.push_back(p);
+    //if(*it > 0.0)
+    //{
+      ////std::cout << p[0] << ", " << p[1] << ", " << p[2] << std::endl;
+      //curve.push_back(p);
+    //}
+    //else
+    //{
+      //curve.push_back(p);
+    //}
+  }
+
+  return curve;
+}
+
+template <typename M>
+std::vector<std::vector<std::vector<typename M::Point > > >
+SlicerT<M>::getCurvature()
+{
+  return curvature;
+}

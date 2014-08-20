@@ -214,7 +214,7 @@ MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight)
    QAction *a = findAction("Gcode");
    a->setChecked(true);
    slotDrawMode(a);
-
+   curvature = slicer.getCurvature();
    //draw_mode_ = 0;
    //draw_openmesh("Gcode");
 }
@@ -231,6 +231,7 @@ MeshViewerWidgetT<M>::slice_mesh(double layerHeight)
    QAction *a = findAction("Gcode");
    a->setChecked(true);
    slotDrawMode(a);
+   curvature = slicer.getCurvature();
 
 
    //draw_mode_ = 0;
@@ -253,17 +254,18 @@ QDialog
 template <typename M>
 MeshViewerWidgetT<M>::MeshViewerWidgetT(QWidget* _parent)
     : QGLViewerWidget(_parent),
-    completeLoop(false),  
-    f_strips_(false), 
+    completeLoop(false),
+      displayPath(true),
+      displayPoints(true),
+      displayCurvature(false), 
+      f_strips_(false), 
       tex_id_(0),
       tex_mode_(GL_MODULATE),
       strips_(mesh_),
       use_color_(true),
       show_vnormals_(false),
-      show_fnormals_(false),
-      displayPath(true),
-      displayPoints(true),
-      displayCurvature(false)
+      show_fnormals_(false)
+
 {
     add_draw_mode("Points");
     add_draw_mode("Hidden-Line");
@@ -851,7 +853,41 @@ MeshViewerWidgetT<M>::draw_openmesh(const std::string& _draw_mode)
       }
       if(displayCurvature)
       {
-        std::cout << "Not ready yet" << std::endl;
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+        for(int j=0; j < layerHeight; j++)
+        {
+          for(size_t i=0; i < toolpath[j].size(); i++)
+          {  
+            glColorPointer(3, GL_FLOAT, 0, &curvature[j][i][0]);
+            glVertexPointer(3, GL_FLOAT, 0, &toolpath[j][i][0]);
+            glPointSize(2.0f);
+            glDrawArrays( GL_POINTS, 0, static_cast<GLsizei>(toolpath[j][i].size()) );
+          }
+        }
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY);
+        
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //glBegin(GL_POINTS);
+        //glPointSize(2.0f);
+        //for(int j=0; j < layerHeight; j++)
+        //{
+          //for(size_t i=0; i < toolpath[j].size(); i++)
+          //{  
+            //for(size_t k = 0; k < toolpath[j][i].size(); k++)
+            //{
+              ////if(curvature[j][i][k] > 0)
+              ////{
+                //std::cout << curvature[j][i][k] << std::endl;
+                //glColor3f((float)curvature[j][i][k], 1.0f - (float)curvature[j][i][k], 0.0f);
+                //glVertex3f(toolpath[j][i][k][0], toolpath[j][i][k][1], toolpath[j][i][k][2]);
+              ////}
+            //}
+          //}
+        //}
+        glEnd();
       }
       glEnd();
     }

@@ -66,15 +66,19 @@ public:
   SlicerT<M>(M m, double lh, bool cl);
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpath();
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpathGraph();
+  std::vector<std::vector<std::vector<typename M::Point > > >  getCurvature();
 
 private:
   Mesh mesh_;
   std::vector<std::vector<std::vector<Point > > > layers;
+  std::vector<std::vector<std::vector<Point > > > curvature;
   const bool completeLoop;
   const double layer_height;
   std::pair <float, float> zAxisMinMax();
   bool linePlaneIntersection(std::vector<Point> *layer, HalfedgeHandle heh, float h);
   void resampleLayerSection(std::vector<Point>* layerSection, std::vector<Point>* newLayerSection);
+  std::vector<typename M::Point> computeLayerSectionCurvature(const std::vector<Point>& layerSection);
+  
 
 };
 
