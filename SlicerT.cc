@@ -73,6 +73,7 @@ SlicerT<M>::getToolpath()
 {
 
     float zMin, zMax;
+    std::cout << "Before minmax \n";
     std::pair <float, float> zAxisBoundry = zAxisMinMax();
     zMin = zAxisBoundry.first;
     zMax = zAxisBoundry.second;
@@ -81,9 +82,11 @@ SlicerT<M>::getToolpath()
     float h = zMin;
     int iters = diff / layer_height;
 
+    std::cout << "Before for loop\n";
     //h += layer_height;
     for(int i = 0; i < iters; i++)
     {
+      std::cout << "iter " << i << "\n";
       std::vector<std::vector<Point> > layer;
       std::vector<std::vector<Point> > layerCurvature;
       std::vector<Point> intersections;
@@ -156,12 +159,17 @@ SlicerT<M>::getToolpath()
           }
         }
         if(layerSection.size() > 0)
-        {  
+        {
+          std::cout << layerSection.size() << std::endl;
+          std::cout << "in layer section greater than zero \n";
           std::vector<Point> newLayerSection;
+          std::cout << "Before resample\n";
           resampleLayerSection(&layerSection, &newLayerSection);
+          std::cout << "After resample\n";
           std::vector<Point> layerSectionCurvature = computeLayerSectionCurvature(newLayerSection);
           layerCurvature.push_back(layerSectionCurvature);
           layer.push_back(newLayerSection);
+          std::cout << "end of if \n";
         }
       }
       curvature.push_back(layerCurvature);
@@ -323,6 +331,11 @@ SlicerT<M>::resampleLayerSection(std::vector<Point>* layerSection, std::vector<P
     }
     newLayerSection->push_back(b);
   }
+  if(layerSection->size() == 1)
+  {
+    Point p(layerSection->at(0));
+    newLayerSection->push_back(p);
+  }
 
 }
 
@@ -331,9 +344,20 @@ std::vector<typename M::Point>
 SlicerT<M>::computeLayerSectionCurvature(const std::vector<Point>& layerSection)
 {
   std::vector<double> c;
-	double max = 0.0;
+	std::vector<Point> curve;
+  double max = 0.0;
 	double min = 360.0;
   c.push_back(0.0f);
+
+  if(layerSection.size() < 3)
+  {
+    Point x(0.0f, 0.0f, 1.0f);
+    curve.push_back(x);
+    return curve;
+  }
+
+  std::cout << layerSection.size() << std::endl;
+
   for (typename std::vector<Point>::const_iterator it = layerSection.begin() + 1;
       it != layerSection.end() - 1; ++it)
 	{
@@ -395,8 +419,8 @@ SlicerT<M>::computeLayerSectionCurvature(const std::vector<Point>& layerSection)
     //std::cout << numer << " / " << denom << " = "<< k << std::endl;
 	}
 	c.push_back(0.0f);
-
-  std::vector<Point> curve;
+  std::cout << "After c made";
+  
   Point x(0.0f, 0.0f, 1.0f);
   Point n(1.0f, 1.0f, 1.0f);
 

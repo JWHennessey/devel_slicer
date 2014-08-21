@@ -48,7 +48,6 @@ struct Vertex
 };
 
 
-
 template <typename M>
 class SlicerT
 {
