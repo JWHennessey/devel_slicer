@@ -10,6 +10,7 @@
 #include <QDoubleSpinBox>
 #include <QRadioButton>
 #include <QGroupBox>
+#include <QCheckBox>
 #include "MeshViewerWidget.hh"
 
 //class MeshViewerWidget;
@@ -33,6 +34,7 @@ public slots:
   void toggleRadio2();
   void toggleRadio3();
   void toggleRadio4();
+  void resampleToggle();
 
 private:
   MeshViewerWidget* meshViewer;
@@ -42,7 +44,8 @@ private:
   QPushButton* rotateXBtn;
   QPushButton* rotateYBtn;
   QPushButton* rotateZBtn;
-  QRadioButton* completeLoopBtn;
+  QCheckBox* completeLoopBtn;
+  QCheckBox* resampleBtn;
   QSlider* layerSlider;
   QSlider* lineSlider;
   void addActions();

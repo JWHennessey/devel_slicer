@@ -48,9 +48,12 @@ void ControlsWidget::addControls()
   vlay->addWidget(layerHeightSpinBox);
 
 
-  completeLoopBtn = new QRadioButton("Complete Loop", this);
+  completeLoopBtn = new QCheckBox("Complete Loop", this);
   vlay->addWidget(completeLoopBtn);
 
+  resampleBtn = new QCheckBox("Resample", this);
+  vlay->addWidget(resampleBtn);
+  
   sliceBtn = new QPushButton("Slice Mesh");
   vlay->addWidget(sliceBtn);
 
@@ -94,6 +97,7 @@ void ControlsWidget::addActions()
   connect(sliceBtn, SIGNAL(clicked()),this, SLOT(slice()));
   connect(sliceBtnAlt, SIGNAL(clicked()),this, SLOT(sliceAlt()));
   connect(completeLoopBtn, SIGNAL(clicked()),this, SLOT(completeLoopToggle()));
+  connect(resampleBtn, SIGNAL(clicked()),this, SLOT(resampleToggle()));
   connect(rotateXBtn, SIGNAL(clicked()),this, SLOT(rotateX()));
   connect(rotateYBtn, SIGNAL(clicked()),this, SLOT(rotateY()));
   connect(rotateZBtn, SIGNAL(clicked()),this, SLOT(rotateZ()));
@@ -105,6 +109,11 @@ void ControlsWidget::addActions()
   connect(radio4, SIGNAL(clicked()),this, SLOT(toggleRadio4()));
 }
 
+
+void ControlsWidget::resampleToggle()
+{
+  meshViewer->toggleResample();
+}
 
 void ControlsWidget::toggleRadio1()
 {

@@ -12,7 +12,6 @@ set (targetName Slicer)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -g -ftest-coverage -fprofile-arcs")
 
-
 # source code directories
 set (directories 
   .

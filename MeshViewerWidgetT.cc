@@ -70,6 +70,15 @@ using namespace Qt;
 using namespace Qt;
 //== IMPLEMENTATION ========================================================== 
 
+
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::toggleResample()
+{
+  resample = !resample;
+}
+
 template <typename M>
 void
 MeshViewerWidgetT<M>::toggleDisplay1()
@@ -207,7 +216,7 @@ template <typename M>
 void 
 MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight)
 {
-   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, completeLoop);
+   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, completeLoop, resample);
    toolpath = slicer.getToolpathGraph();
    layerHeight = toolpath.size();
    lineNumber = getLineNumber();
@@ -224,7 +233,7 @@ template <typename M>
 void 
 MeshViewerWidgetT<M>::slice_mesh(double layerHeight)
 {
-   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, completeLoop);
+   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, completeLoop, resample);
    toolpath = slicer.getToolpath();
    layerHeight = toolpath.size();
    lineNumber = getLineNumber();
@@ -257,7 +266,8 @@ MeshViewerWidgetT<M>::MeshViewerWidgetT(QWidget* _parent)
     completeLoop(false),
       displayPath(true),
       displayPoints(true),
-      displayCurvature(false), 
+      displayCurvature(false),
+      resample(false),
       f_strips_(false), 
       tex_id_(0),
       tex_mode_(GL_MODULATE),

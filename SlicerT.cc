@@ -1,9 +1,10 @@
 #define SLICERT_CC
 
 template <typename M>
-SlicerT<M>::SlicerT(M m, double lh, bool cl) : 
+SlicerT<M>::SlicerT(M m, double lh, bool cl, bool sample) : 
   completeLoop(cl),
-  layer_height(lh)
+  layer_height(lh),
+  resample(sample)
 {
   mesh_ = m;
 }
@@ -289,6 +290,9 @@ template <typename M>
 void
 SlicerT<M>::resampleLayerSection(std::vector<Point>* layerSection, std::vector<Point>* newLayerSection)
 {
+
+  //newLayerSection = layerSection;
+
   if(completeLoop)
   {
     Point p(layerSection->at(0));
@@ -301,21 +305,25 @@ SlicerT<M>::resampleLayerSection(std::vector<Point>* layerSection, std::vector<P
 
     Point a = layerSection->at(i-1);
     Point b = layerSection->at(i);
-    Point direction = b - a;
-    Eigen::Vector3d aVec(a[0], a[1], a[2]);
-
-    Eigen::Vector3d d(direction[0], direction[1], direction[2]);
-    int iters = d.norm() / layer_height;
-    newLayerSection->push_back(a);
-
-    for(int j = 1; j < iters; j++)
+    if(resample)
     {
-      Eigen::Vector3d xVec = aVec + ((d / iters) * j);
-      Point x(xVec[0], xVec[1],xVec[2]);
-      newLayerSection->push_back(x);
+      Point direction = b - a;
+      Eigen::Vector3d aVec(a[0], a[1], a[2]);
+
+      Eigen::Vector3d d(direction[0], direction[1], direction[2]);
+      int iters = d.norm() / layer_height;
+      newLayerSection->push_back(a);
+
+      for(int j = 1; j < iters; j++)
+      {
+        Eigen::Vector3d xVec = aVec + ((d / iters) * j);
+        Point x(xVec[0], xVec[1],xVec[2]);
+        newLayerSection->push_back(x);
+      }
     }
     newLayerSection->push_back(b);
   }
+
 }
 
 template <typename M>

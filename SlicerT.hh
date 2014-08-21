@@ -14,6 +14,9 @@
 
 using namespace boost;
 
+
+typedef typename OpenMesh::TriMesh_ArrayKernelT<OpenMesh::DefaultTraits>::Point Point;
+
 template <typename M>
 class IntersectionT
 {
@@ -63,7 +66,7 @@ public:
   typedef typename Mesh::VertexHandle VertexHandle;
   typedef typename Mesh::FaceHandle FaceHandle;
   typedef typename Mesh::EdgeHandle EdgeHandle;
-  SlicerT<M>(M m, double lh, bool cl);
+  SlicerT<M>(M m, double lh, bool cl, bool sample);
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpath();
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpathGraph();
   std::vector<std::vector<std::vector<typename M::Point > > >  getCurvature();
@@ -74,6 +77,7 @@ private:
   std::vector<std::vector<std::vector<Point > > > curvature;
   const bool completeLoop;
   const double layer_height;
+  const bool resample;
   std::pair <float, float> zAxisMinMax();
   bool linePlaneIntersection(std::vector<Point> *layer, HalfedgeHandle heh, float h);
   void resampleLayerSection(std::vector<Point>* layerSection, std::vector<Point>* newLayerSection);
