@@ -47,7 +47,6 @@ struct Vertex
   int edgeId;
 };
 
-
 template <typename M>
 class SlicerT
 {

@@ -328,7 +328,6 @@ SlicerT<M>::resampleLayerSection(std::vector<Point>* layerSection, std::vector<P
     Point p(layerSection->at(0));
     newLayerSection->push_back(p);
   }
-
 }
 
 template <typename M>
