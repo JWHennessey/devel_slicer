@@ -224,6 +224,7 @@ MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight)
    a->setChecked(true);
    slotDrawMode(a);
    curvature = slicer.getCurvature();
+   slicer.writeGcode();
    //draw_mode_ = 0;
    //draw_openmesh("Gcode");
 }
@@ -241,7 +242,7 @@ MeshViewerWidgetT<M>::slice_mesh(double layerHeight)
    a->setChecked(true);
    slotDrawMode(a);
    curvature = slicer.getCurvature();
-
+   slicer.writeGcode();
 
    //draw_mode_ = 0;
    //draw_openmesh("Gcode");

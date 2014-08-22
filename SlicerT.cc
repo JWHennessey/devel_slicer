@@ -1,10 +1,15 @@
+#ifndef SLICERT_CC
 #define SLICERT_CC
 
 template <typename M>
 SlicerT<M>::SlicerT(M m, double lh, bool cl, bool sample) : 
   completeLoop(cl),
   layer_height(lh),
-  resample(sample)
+  resample(sample),
+  wall_thickness(2),
+  LINE_WIDTH(0.3f),
+  platformCenterX(100.0f),
+  platformCenterY(100.0f)
 {
   mesh_ = m;
 }
@@ -85,6 +90,7 @@ SlicerT<M>::getToolpath()
     for(int i = 0; i < iters; i++)
     {
       std::vector<std::vector<Point> > layer;
+      std::vector<std::vector<Point> > originalLayer;
       std::vector<std::vector<Point> > layerCurvature;
       std::vector<Point> intersections;
       std::vector<EdgeHandle> seenEdges;
@@ -162,10 +168,12 @@ SlicerT<M>::getToolpath()
           std::vector<Point> layerSectionCurvature = computeLayerSectionCurvature(newLayerSection);
           layerCurvature.push_back(layerSectionCurvature);
           layer.push_back(newLayerSection);
+          originalLayer.push_back(layerSection);
         }
       }
       curvature.push_back(layerCurvature);
       layers.push_back(layer);
+      layersOriginal.push_back(originalLayer);
       h += layer_height;
       std::cout << "Layer " << layers.size() << " no. layer parts " <<  layer.size() << "\n";
     }
@@ -192,6 +200,7 @@ SlicerT<M>::getToolpathGraph()
     for(int i = 0; i < iters; i++)
     {
       std::vector<std::vector<Point> > layer;
+      std::vector<std::vector<Point> > originalLayer;
       std::vector<std::vector<Point> > layerCurvature;
       std::unordered_multimap<int,int> connectivityLookup;
       typedef adjacency_list < vecS, vecS, undirectedS, Vertex, no_property > UndirectedGraph;
@@ -275,10 +284,12 @@ SlicerT<M>::getToolpathGraph()
           std::vector<Point> layerSectionCurvature = computeLayerSectionCurvature(newLayerSection);
           layerCurvature.push_back(layerSectionCurvature);
           layer.push_back(newLayerSection);
+          originalLayer.push_back(layerSection);
         }
       }
       curvature.push_back(layerCurvature);
       layers.push_back(layer);
+      layersOriginal.push_back(originalLayer);
       h += layer_height;
       std::cout << "Layer " << layers.size() << " no. layer parts " <<  layer.size() << "\n";
     }
@@ -443,3 +454,85 @@ SlicerT<M>::getCurvature()
 {
   return curvature;
 }
+
+template <typename M>
+void
+SlicerT<M>::writeGcode()
+{
+
+  std::cout << "Writing Gcode... \n";
+
+  Eigen::Vector2f c(platformCenterX, platformCenterY);
+  PrintheadT<M> ph = PrintheadT<M>();
+  Point start = layersOriginal.at(0).at(0).at(0);
+  ph.extrudeXYAxisTo(10.0, 10.0);
+  ph.extrudeXYZAxisTo(start[0], start[1], 0.1);
+  for (typename std::vector<std::vector<std::vector<Point > > >::iterator layerIt = layersOriginal.begin();
+       layerIt != layersOriginal.end();
+       ++layerIt)
+  {
+    std::vector<std::vector<Point > > layer = *layerIt;
+    for (typename std::vector<std::vector<Point > >::iterator layerSectionIt = layer.begin();
+         layerSectionIt != layer.end();
+         ++layerSectionIt)
+    {
+      std::vector<Point> layerSection = *layerSectionIt;
+      for(int i = (wall_thickness-1); i >= 0; i--)
+      {
+        float wallOffset = LINE_WIDTH * i;
+        for (typename std::vector<Point>::iterator pointIt = layerSection.begin();
+             pointIt != layerSection.end();
+             ++pointIt)
+        {
+          Point p = *pointIt;
+          Eigen::Vector2f v(p[0], p[1]);
+          
+          if(v[0] > 0.0) v[0] -= wallOffset;
+          else v[0] += wallOffset;
+
+          if(v[1] > 0.0) v[1] -= wallOffset;
+          else v[1] += wallOffset;
+
+          v += c;
+          ph.extrudeXYAxisTo(v[0], v[1]);
+        }
+      }
+    }
+    ph.moveZAxis();
+
+  }
+
+  const std::vector<std::string> commands = ph.getCommands();
+
+  std::ofstream output;
+  output.open ("gcode/output.gcode");
+
+  appendFile(&output, "gcode/start_gcode_um2.txt");
+
+  for (std::vector<std::string>::const_iterator it = commands.begin(); it != commands.end(); ++it)
+    output << *it;
+
+  appendFile(&output, "gcode/end_gcode_um2.txt");
+
+  output.close();
+
+  std::cout << "Finished writing Gcode \n";
+}
+
+template <typename M>
+void
+SlicerT<M>::appendFile(std::ofstream *output, const char* filename)
+{
+  std::string line;
+  std::ifstream myfile (filename);
+  if (myfile.is_open())
+  {
+    while ( getline (myfile,line) )
+    {
+      *output << line << "\n";
+    }
+    myfile.close();
+  }
+}
+
+#endif

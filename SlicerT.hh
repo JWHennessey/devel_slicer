@@ -10,7 +10,11 @@
 #include <boost/config.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
-
+#include "PrintheadT.hh"
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
 
 using namespace boost;
 
@@ -68,19 +72,25 @@ public:
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpath();
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpathGraph();
   std::vector<std::vector<std::vector<typename M::Point > > >  getCurvature();
+  void writeGcode();
 
 private:
   Mesh mesh_;
   std::vector<std::vector<std::vector<Point > > > layers;
+  std::vector<std::vector<std::vector<Point > > > layersOriginal;
   std::vector<std::vector<std::vector<Point > > > curvature;
   const bool completeLoop;
   const double layer_height;
   const bool resample;
+  const int wall_thickness;
+  const float LINE_WIDTH;
+  const float platformCenterX;
+  const float platformCenterY;
   std::pair <float, float> zAxisMinMax();
   bool linePlaneIntersection(std::vector<Point> *layer, HalfedgeHandle heh, float h);
   void resampleLayerSection(std::vector<Point>* layerSection, std::vector<Point>* newLayerSection);
   std::vector<typename M::Point> computeLayerSectionCurvature(const std::vector<Point>& layerSection);
-  
+  void appendFile(std::ofstream *output, const char* filename);
 
 };
 
