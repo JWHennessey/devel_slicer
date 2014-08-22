@@ -465,8 +465,7 @@ SlicerT<M>::writeGcode()
   Eigen::Vector2f c(platformCenterX, platformCenterY);
   PrintheadT<M> ph = PrintheadT<M>();
   Point start = layersOriginal.at(0).at(0).at(0);
-  ph.extrudeXYAxisTo(10.0, 10.0);
-  ph.extrudeXYZAxisTo(start[0], start[1], 0.1);
+  ph.extrudeXYZAxisTo(start[0]+platformCenterX, start[1]+platformCenterY, 0.1);
   for (typename std::vector<std::vector<std::vector<Point > > >::iterator layerIt = layersOriginal.begin();
        layerIt != layersOriginal.end();
        ++layerIt)
