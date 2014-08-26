@@ -39,6 +39,7 @@ public slots:
 private:
   MeshViewerWidget* meshViewer;
   QDoubleSpinBox* layerHeightSpinBox;
+  QDoubleSpinBox* offsetSpinBox;
   QPushButton* sliceBtn;
   QPushButton* sliceBtnAlt;
   QPushButton* rotateXBtn;

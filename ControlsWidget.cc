@@ -47,6 +47,13 @@ void ControlsWidget::addControls()
   layerHeightSpinBox->setValue(0.1);
   vlay->addWidget(layerHeightSpinBox);
 
+  offsetSpinBox = new QDoubleSpinBox();
+  offsetSpinBox->setPrefix("Offset:  ");
+  offsetSpinBox->setRange(0.0, 1.0);
+  offsetSpinBox->setSingleStep(0.01);
+  offsetSpinBox->setValue(0.0);
+  vlay->addWidget(offsetSpinBox);
+
 
   completeLoopBtn = new QCheckBox("Complete Loop", this);
   vlay->addWidget(completeLoopBtn);
@@ -142,7 +149,8 @@ void ControlsWidget::completeLoopToggle()
 void ControlsWidget::slice()
 {
   double layerHeight = layerHeightSpinBox->value();
-  meshViewer->slice_mesh(layerHeight);
+  double offset = offsetSpinBox->value();
+  meshViewer->slice_mesh(layerHeight, offset);
 
   int count = meshViewer->getLayerCount();
   layerSlider->setRange(0, count);
@@ -155,7 +163,8 @@ void ControlsWidget::slice()
 void ControlsWidget::sliceAlt()
 {
   double layerHeight = layerHeightSpinBox->value();
-  meshViewer->slice_mesh_alt(layerHeight);
+  double offset = offsetSpinBox->value();
+  meshViewer->slice_mesh_alt(layerHeight, offset);
 
   int count = meshViewer->getLayerCount();
   layerSlider->setRange(0, count);

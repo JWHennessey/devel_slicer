@@ -72,7 +72,7 @@ public:
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpath();
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpathGraph();
   std::vector<std::vector<std::vector<typename M::Point > > >  getCurvature();
-  void writeGcode();
+  void writeGcode(double offset);
 
 private:
   Mesh mesh_;

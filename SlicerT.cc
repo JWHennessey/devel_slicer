@@ -457,7 +457,7 @@ SlicerT<M>::getCurvature()
 
 template <typename M>
 void
-SlicerT<M>::writeGcode()
+SlicerT<M>::writeGcode(double offset)
 {
 
   std::cout << "Writing Gcode... \n";
@@ -466,6 +466,11 @@ SlicerT<M>::writeGcode()
   PrintheadT<M> ph = PrintheadT<M>();
   Point start = layersOriginal.at(0).at(0).at(0);
   ph.extrudeXYZAxisTo(start[0]+platformCenterX, start[1]+platformCenterY, 0.1);
+  int layerCount = 1;
+  int midpoint = layersOriginal.size() / 2;
+  //float offset = 0.122;
+  float offsetOut = 0.0f;
+  float offsetIn = offset * midpoint;
   for (typename std::vector<std::vector<std::vector<Point > > >::iterator layerIt = layersOriginal.begin();
        layerIt != layersOriginal.end();
        ++layerIt)
@@ -485,19 +490,46 @@ SlicerT<M>::writeGcode()
         {
           Point p = *pointIt;
           Eigen::Vector2f v(p[0], p[1]);
-          
-          if(v[0] > 0.0) v[0] -= wallOffset;
-          else v[0] += wallOffset;
+          if(v[0] > 0.0) 
+          {
+            v[0] -= wallOffset;
+          }
+          else
+          {
+            v[0] += wallOffset;
+          }
 
-          if(v[1] > 0.0) v[1] -= wallOffset;
-          else v[1] += wallOffset;
-
+          if(v[1] > 0.0)
+          {
+            v[1] -= wallOffset;
+          }
+          else
+          {
+            v[1] += wallOffset;
+          }
+          if(layerCount <= midpoint)
+          {
+            v = v + (((v / v.norm()) / 10) * (1.0f + offsetOut));//(offset * (layersOriginal.size() - layerCount));
+          }
+          else
+          {
+            v = v + (((v / v.norm()) / 10) * (1.0f +  offsetIn));//(offset * layerCount);
+          }
           v += c;
           ph.extrudeXYAxisTo(v[0], v[1]);
         }
       }
     }
+    layerCount++;
     ph.moveZAxis();
+    if(layerCount <= midpoint)
+    {
+      offsetOut += offset;
+    }
+    else
+    {
+      offsetIn -= offset;
+    }
 
   }
 

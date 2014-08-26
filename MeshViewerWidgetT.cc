@@ -214,7 +214,7 @@ MeshViewerWidgetT<M>::setLineNumber(int value)
 
 template <typename M>
 void 
-MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight)
+MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight, double offset)
 {
    SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, completeLoop, resample);
    toolpath = slicer.getToolpathGraph();
@@ -224,7 +224,7 @@ MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight)
    a->setChecked(true);
    slotDrawMode(a);
    curvature = slicer.getCurvature();
-   slicer.writeGcode();
+   slicer.writeGcode(offset);
    //draw_mode_ = 0;
    //draw_openmesh("Gcode");
 }
@@ -232,7 +232,7 @@ MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight)
 
 template <typename M>
 void 
-MeshViewerWidgetT<M>::slice_mesh(double layerHeight)
+MeshViewerWidgetT<M>::slice_mesh(double layerHeight, double offset)
 {
    SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, completeLoop, resample);
    toolpath = slicer.getToolpath();
@@ -242,7 +242,7 @@ MeshViewerWidgetT<M>::slice_mesh(double layerHeight)
    a->setChecked(true);
    slotDrawMode(a);
    curvature = slicer.getCurvature();
-   slicer.writeGcode();
+   slicer.writeGcode(offset);
 
    //draw_mode_ = 0;
    //draw_openmesh("Gcode");
