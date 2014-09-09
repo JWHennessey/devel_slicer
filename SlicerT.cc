@@ -532,7 +532,7 @@ SlicerT<M>::writeGcode(double offset)
     }
 
   }
-
+  std::vector<std::vector<std::vector<Point > > > gcode(layers);
   const std::vector<std::string> commands = ph.getCommands();
 
   std::ofstream output;

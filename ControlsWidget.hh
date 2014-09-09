@@ -34,6 +34,7 @@ public slots:
   void toggleRadio2();
   void toggleRadio3();
   void toggleRadio4();
+  void toggleRadio5();
   void resampleToggle();
 
 private:
@@ -55,6 +56,7 @@ private:
   QRadioButton *radio2;
   QRadioButton *radio3;
   QRadioButton *radio4;
+  QRadioButton *radio5;
   QGroupBox *groupBox;
 
 

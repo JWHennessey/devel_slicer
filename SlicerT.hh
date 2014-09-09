@@ -79,6 +79,7 @@ private:
   std::vector<std::vector<std::vector<Point > > > layers;
   std::vector<std::vector<std::vector<Point > > > layersOriginal;
   std::vector<std::vector<std::vector<Point > > > curvature;
+  std::vector<std::vector<std::vector<Point > > > gcode;
   const bool completeLoop;
   const double layer_height;
   const bool resample;

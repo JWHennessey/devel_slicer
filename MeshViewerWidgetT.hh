@@ -102,6 +102,7 @@ public:
   void toggleDisplay2();
   void toggleDisplay3();
   void toggleDisplay4();
+  void toggleDisplay5();
   void toggleResample();
 
   /// open mesh
@@ -122,6 +123,7 @@ public:
   const Mesh& mesh() const { return mesh_; }
   
 protected:
+  void turnAllDisplayOff();
   bool completeLoop;
   ////s inherited drawing method
   virtual void draw_scene(const std::string& _draw_mode);
@@ -185,6 +187,7 @@ protected:
   bool                   displayPath;
   bool                   displayPoints;
   bool                   displayCurvature;
+  bool                   displayGcode;
   bool                   resample;
   bool                   f_strips_; // enable/disable strip usage
   GLuint                 tex_id_;

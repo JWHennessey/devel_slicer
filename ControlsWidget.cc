@@ -80,12 +80,14 @@ void ControlsWidget::addControls()
   radio2 = new QRadioButton(tr("Points Only"));
   radio3 = new QRadioButton(tr("Path Only"));
   radio4 = new QRadioButton(tr("Curvature"));
+  radio5 = new QRadioButton(tr("Gcode"));
   radio1->setChecked(true);
   QVBoxLayout *vbox = new QVBoxLayout;
   vbox->addWidget(radio1);
   vbox->addWidget(radio2);
   vbox->addWidget(radio3);
   vbox->addWidget(radio4);
+  vbox->addWidget(radio5);
   vbox->addStretch(1);
   groupBox->setLayout(vbox);
   vlay->addWidget(groupBox);
@@ -114,6 +116,7 @@ void ControlsWidget::addActions()
   connect(radio2, SIGNAL(clicked()),this, SLOT(toggleRadio2()));
   connect(radio3, SIGNAL(clicked()),this, SLOT(toggleRadio3()));
   connect(radio4, SIGNAL(clicked()),this, SLOT(toggleRadio4()));
+  connect(radio5, SIGNAL(clicked()),this, SLOT(toggleRadio5()));
 }
 
 
@@ -141,6 +144,12 @@ void ControlsWidget::toggleRadio4()
 {
   meshViewer->toggleDisplay4();
 }
+
+void ControlsWidget::toggleRadio5()
+{
+  meshViewer->toggleDisplay5();
+}
+
 void ControlsWidget::completeLoopToggle()
 {
   meshViewer->completeLoopToggle(completeLoopBtn->isChecked());

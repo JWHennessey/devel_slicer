@@ -83,9 +83,9 @@ template <typename M>
 void
 MeshViewerWidgetT<M>::toggleDisplay1()
 {
+  turnAllDisplayOff();
   displayPath = true;
   displayPoints = true;
-  displayCurvature = false;
   updateGL();
 }
 
@@ -93,9 +93,8 @@ template <typename M>
 void
 MeshViewerWidgetT<M>::toggleDisplay2()
 {
-  displayPath = false;
+  turnAllDisplayOff();
   displayPoints = true;
-  displayCurvature = false;
   updateGL();
 }
 
@@ -103,9 +102,8 @@ template <typename M>
 void
 MeshViewerWidgetT<M>::toggleDisplay3()
 {
+  turnAllDisplayOff();
   displayPath = true;
-  displayPoints = false;
-  displayCurvature = false;
   updateGL();
 }
 
@@ -113,10 +111,29 @@ template <typename M>
 void
 MeshViewerWidgetT<M>::toggleDisplay4()
 {
-  displayPath = false;
-  displayPoints = false;
+  turnAllDisplayOff();
   displayCurvature = true;
   updateGL();
+}
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::toggleDisplay5()
+{
+  std::cout << "Display 5\n";
+  turnAllDisplayOff();
+  displayGcode = true;
+  updateGL();
+}
+
+template <typename M>
+void
+MeshViewerWidgetT<M>::turnAllDisplayOff()
+{
+  displayPath = false;
+  displayPoints = false;
+  displayCurvature = false;
+  displayGcode = false;
 }
 
 
