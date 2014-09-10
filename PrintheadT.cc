@@ -33,6 +33,19 @@ PrintheadT<M>::extrudeXYAxisTo(float x, float y)
 
 template <typename M> 
 void 
+PrintheadT<M>::moveXYAxisTo(float x, float y)
+{
+  float d = sqrt(pow((_x - x), 2) + pow((_y - y), 2));
+  _x = x;
+  _y = y;
+  std::stringstream ss;
+  ss << "G1 F2000 X" << _x << " Y" << _y << "\n";
+  std::string s = ss.str();
+  _commands.push_back(s);
+}
+
+template <typename M> 
+void 
 PrintheadT<M>::extrudeXYZAxisTo(float x, float y, float z)
 {
 

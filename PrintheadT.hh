@@ -12,6 +12,7 @@ class PrintheadT
 public:
   PrintheadT();
   void extrudeXYAxisTo(float x, float y);
+  void moveXYAxisTo(float x, float y);
   void extrudeXYZAxisTo(float x, float y, float z);
   void moveAlongXYAxis(float x, float y);
   void extrudeAlongXYAxis(float x, float y);
