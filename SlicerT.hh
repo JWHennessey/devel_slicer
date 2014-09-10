@@ -68,7 +68,7 @@ public:
   typedef typename Mesh::VertexHandle VertexHandle;
   typedef typename Mesh::FaceHandle FaceHandle;
   typedef typename Mesh::EdgeHandle EdgeHandle;
-  SlicerT<M>(M m, double lh, bool cl, bool sample);
+  SlicerT<M>(M m, double lh, bool sample, int wt);
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpath();
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpathGraph();
   std::vector<std::vector<std::vector<typename M::Point > > >  getCurvature();

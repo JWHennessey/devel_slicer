@@ -7,6 +7,7 @@
 #include <QButtonGroup>
 #include <QLabel>
 #include <QSlider>
+#include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QRadioButton>
 #include <QGroupBox>
@@ -29,24 +30,25 @@ public slots:
   void rotateX();
   void rotateY();
   void rotateZ();
-  void completeLoopToggle();
+  //void completeLoopToggle();
   void toggleRadio1();
   void toggleRadio2();
   void toggleRadio3();
   void toggleRadio4();
-  void toggleRadio5();
+  //void toggleRadio5();
   void resampleToggle();
 
 private:
   MeshViewerWidget* meshViewer;
   QDoubleSpinBox* layerHeightSpinBox;
   QDoubleSpinBox* offsetSpinBox;
+  QSpinBox* wallThicknessSpinBox;
   QPushButton* sliceBtn;
   QPushButton* sliceBtnAlt;
   QPushButton* rotateXBtn;
   QPushButton* rotateYBtn;
   QPushButton* rotateZBtn;
-  QCheckBox* completeLoopBtn;
+  //QCheckBox* completeLoopBtn;
   QCheckBox* resampleBtn;
   QSlider* layerSlider;
   QSlider* lineSlider;
@@ -56,7 +58,7 @@ private:
   QRadioButton *radio2;
   QRadioButton *radio3;
   QRadioButton *radio4;
-  QRadioButton *radio5;
+  //QRadioButton *radio5;
   QGroupBox *groupBox;
 
 

@@ -55,8 +55,16 @@ void ControlsWidget::addControls()
   vlay->addWidget(offsetSpinBox);
 
 
-  completeLoopBtn = new QCheckBox("Complete Loop", this);
-  vlay->addWidget(completeLoopBtn);
+  wallThicknessSpinBox = new QSpinBox();
+  wallThicknessSpinBox->setPrefix("Wall Thickness:  ");
+  wallThicknessSpinBox->setRange(1, 30);
+  wallThicknessSpinBox->setSingleStep(1);
+  wallThicknessSpinBox->setValue(2);
+  vlay->addWidget(wallThicknessSpinBox);
+
+
+  //completeLoopBtn = new QCheckBox("Complete Loop", this);
+  //vlay->addWidget(completeLoopBtn);
 
   resampleBtn = new QCheckBox("Resample", this);
   vlay->addWidget(resampleBtn);
@@ -80,14 +88,14 @@ void ControlsWidget::addControls()
   radio2 = new QRadioButton(tr("Points Only"));
   radio3 = new QRadioButton(tr("Path Only"));
   radio4 = new QRadioButton(tr("Curvature"));
-  radio5 = new QRadioButton(tr("Gcode"));
+  //radio5 = new QRadioButton(tr("Gcode"));
   radio1->setChecked(true);
   QVBoxLayout *vbox = new QVBoxLayout;
   vbox->addWidget(radio1);
   vbox->addWidget(radio2);
   vbox->addWidget(radio3);
   vbox->addWidget(radio4);
-  vbox->addWidget(radio5);
+  //vbox->addWidget(radio5);
   vbox->addStretch(1);
   groupBox->setLayout(vbox);
   vlay->addWidget(groupBox);
@@ -105,7 +113,7 @@ void ControlsWidget::addActions()
 {
   connect(sliceBtn, SIGNAL(clicked()),this, SLOT(slice()));
   connect(sliceBtnAlt, SIGNAL(clicked()),this, SLOT(sliceAlt()));
-  connect(completeLoopBtn, SIGNAL(clicked()),this, SLOT(completeLoopToggle()));
+  //connect(completeLoopBtn, SIGNAL(clicked()),this, SLOT(completeLoopToggle()));
   connect(resampleBtn, SIGNAL(clicked()),this, SLOT(resampleToggle()));
   connect(rotateXBtn, SIGNAL(clicked()),this, SLOT(rotateX()));
   connect(rotateYBtn, SIGNAL(clicked()),this, SLOT(rotateY()));
@@ -116,7 +124,7 @@ void ControlsWidget::addActions()
   connect(radio2, SIGNAL(clicked()),this, SLOT(toggleRadio2()));
   connect(radio3, SIGNAL(clicked()),this, SLOT(toggleRadio3()));
   connect(radio4, SIGNAL(clicked()),this, SLOT(toggleRadio4()));
-  connect(radio5, SIGNAL(clicked()),this, SLOT(toggleRadio5()));
+  //connect(radio5, SIGNAL(clicked()),this, SLOT(toggleRadio5()));
 }
 
 
@@ -145,21 +153,22 @@ void ControlsWidget::toggleRadio4()
   meshViewer->toggleDisplay4();
 }
 
-void ControlsWidget::toggleRadio5()
-{
-  meshViewer->toggleDisplay5();
-}
+//void ControlsWidget::toggleRadio5()
+//{
+  //meshViewer->toggleDisplay5();
+//}
 
-void ControlsWidget::completeLoopToggle()
-{
-  meshViewer->completeLoopToggle(completeLoopBtn->isChecked());
-}
+//void ControlsWidget::completeLoopToggle()
+//{
+  //meshViewer->completeLoopToggle(completeLoopBtn->isChecked());
+//}
 
 void ControlsWidget::slice()
 {
   double layerHeight = layerHeightSpinBox->value();
   double offset = offsetSpinBox->value();
-  meshViewer->slice_mesh(layerHeight, offset);
+  int wallThickness = wallThicknessSpinBox->value();
+  meshViewer->slice_mesh(layerHeight, offset, wallThickness);
 
   int count = meshViewer->getLayerCount();
   layerSlider->setRange(0, count);
@@ -173,7 +182,8 @@ void ControlsWidget::sliceAlt()
 {
   double layerHeight = layerHeightSpinBox->value();
   double offset = offsetSpinBox->value();
-  meshViewer->slice_mesh_alt(layerHeight, offset);
+  int wallThickness = wallThicknessSpinBox->value();
+  meshViewer->slice_mesh_alt(layerHeight, offset, wallThickness);
 
   int count = meshViewer->getLayerCount();
   layerSlider->setRange(0, count);

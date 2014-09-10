@@ -231,9 +231,9 @@ MeshViewerWidgetT<M>::setLineNumber(int value)
 
 template <typename M>
 void 
-MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight, double offset)
+MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight, double offset, int wallthickness)
 {
-   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, completeLoop, resample);
+   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, resample, wallthickness);
    toolpath = slicer.getToolpathGraph();
    layerHeight = toolpath.size();
    lineNumber = getLineNumber();
@@ -249,9 +249,9 @@ MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight, double offset)
 
 template <typename M>
 void 
-MeshViewerWidgetT<M>::slice_mesh(double layerHeight, double offset)
+MeshViewerWidgetT<M>::slice_mesh(double layerHeight, double offset, int wallthickness)
 {
-   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, completeLoop, resample);
+   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, resample, wallthickness);
    toolpath = slicer.getToolpath();
    layerHeight = toolpath.size();
    lineNumber = getLineNumber();

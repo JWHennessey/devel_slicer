@@ -2,11 +2,11 @@
 #define SLICERT_CC
 
 template <typename M>
-SlicerT<M>::SlicerT(M m, double lh, bool cl, bool sample) : 
-  completeLoop(cl),
+SlicerT<M>::SlicerT(M m, double lh, bool sample, int wt) : 
+  completeLoop(true),
   layer_height(lh),
   resample(sample),
-  wall_thickness(2),
+  wall_thickness(wt),
   LINE_WIDTH(0.3f),
   platformCenterX(100.0f),
   platformCenterY(100.0f)
