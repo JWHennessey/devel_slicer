@@ -464,7 +464,9 @@ SlicerT<M>::writeGcode(double offset)
 
   Eigen::Vector2f c(platformCenterX, platformCenterY);
   PrintheadT<M> ph = PrintheadT<M>();
-  Point start = layersOriginal.at(0).at(0).at(0);
+  Point p = layersOriginal.at(0).at(0).at(0);
+  float wOffset = (wall_thickness-1) * LINE_WIDTH;
+  Eigen::Vector2f start = applyWallOffset(p, wOffset);
   ph.extrudeXYZAxisTo(start[0]+platformCenterX, start[1]+platformCenterY, 0.1);
   int layerCount = 1;
   int midpoint = layersOriginal.size() / 2;
@@ -489,24 +491,25 @@ SlicerT<M>::writeGcode(double offset)
              ++pointIt)
         {
           Point p = *pointIt;
-          Eigen::Vector2f v(p[0], p[1]);
-          if(v[0] > 0.0) 
-          {
-            v[0] -= wallOffset;
-          }
-          else
-          {
-            v[0] += wallOffset;
-          }
+          Eigen::Vector2f v = applyWallOffset(p, wallOffset);
+          //Eigen::Vector2f v(p[0], p[1]);
+          //if(v[0] > 0.0) 
+          //{
+            //v[0] -= wallOffset;
+          //}
+          //else
+          //{
+            //v[0] += wallOffset;
+          //}
 
-          if(v[1] > 0.0)
-          {
-            v[1] -= wallOffset;
-          }
-          else
-          {
-            v[1] += wallOffset;
-          }
+          //if(v[1] > 0.0)
+          //{
+            //v[1] -= wallOffset;
+          //}
+          //else
+          //{
+            //v[1] += wallOffset;
+          //}
           if(layerCount <= midpoint)
           {
             v = v + (((v / v.norm()) / 10) * (1.0f + offsetOut));//(offset * (layersOriginal.size() - layerCount));
@@ -564,6 +567,31 @@ SlicerT<M>::appendFile(std::ofstream *output, const char* filename)
     }
     myfile.close();
   }
+}
+
+template <typename M>
+Vector2f
+SlicerT<M>::applyWallOffset(Point p, float wallOffset)
+{
+  Eigen::Vector2f v(p[0], p[1]);
+  if(v[0] > 0.0) 
+  {
+    v[0] -= wallOffset;
+  }
+  else
+  {
+    v[0] += wallOffset;
+  }
+
+  if(v[1] > 0.0)
+  {
+    v[1] -= wallOffset;
+  }
+  else
+  {
+    v[1] += wallOffset;
+  }
+  return v;
 }
 
 #endif

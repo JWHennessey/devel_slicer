@@ -17,7 +17,7 @@
 #include <fstream>
 
 using namespace boost;
-
+using namespace Eigen;
 
 typedef typename OpenMesh::TriMesh_ArrayKernelT<OpenMesh::DefaultTraits>::Point Point;
 
@@ -92,6 +92,7 @@ private:
   void resampleLayerSection(std::vector<Point>* layerSection, std::vector<Point>* newLayerSection);
   std::vector<typename M::Point> computeLayerSectionCurvature(const std::vector<Point>& layerSection);
   void appendFile(std::ofstream *output, const char* filename);
+  Vector2f applyWallOffset(Point p, float wallOffset);
 
 };
 
