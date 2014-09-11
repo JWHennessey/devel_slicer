@@ -104,6 +104,7 @@ public:
   void toggleDisplay4();
   void toggleDisplay5();
   void toggleResample();
+  void toggleOutline();
 
   /// open mesh
   virtual bool open_mesh(const char* _filename, OpenMesh::IO::Options _opt);
@@ -188,6 +189,7 @@ protected:
   bool                   displayPoints;
   bool                   displayCurvature;
   bool                   displayGcode;
+  bool                   outlinePath;
   bool                   resample;
   bool                   f_strips_; // enable/disable strip usage
   GLuint                 tex_id_;

@@ -68,7 +68,7 @@ public:
   typedef typename Mesh::VertexHandle VertexHandle;
   typedef typename Mesh::FaceHandle FaceHandle;
   typedef typename Mesh::EdgeHandle EdgeHandle;
-  SlicerT<M>(M m, double lh, bool sample, int wt);
+  SlicerT<M>(M m, double lh, bool sample, int wt, bool outline);
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpath();
   std::vector<std::vector<std::vector<typename M::Point > > > getToolpathGraph();
   std::vector<std::vector<std::vector<typename M::Point > > >  getCurvature();
@@ -81,6 +81,7 @@ private:
   std::vector<std::vector<std::vector<Point > > > curvature;
   std::vector<std::vector<std::vector<Point > > > gcode;
   const bool completeLoop;
+  const bool inToOutOutline;
   const double layer_height;
   const bool resample;
   const int wall_thickness;

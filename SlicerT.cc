@@ -2,8 +2,9 @@
 #define SLICERT_CC
 
 template <typename M>
-SlicerT<M>::SlicerT(M m, double lh, bool sample, int wt) : 
+SlicerT<M>::SlicerT(M m, double lh, bool sample, int wt, bool outline) : 
   completeLoop(true),
+  inToOutOutline(outline),
   layer_height(lh),
   resample(sample),
   wall_thickness(wt),
@@ -484,31 +485,19 @@ SlicerT<M>::writeGcode(double offset)
          ++layerSectionIt)
     {
       std::vector<Point> layerSection = *layerSectionIt;
-      for(int i = (wall_thickness-1); i >= 0; i--)
+      if(inToOutOutline)
       {
-        float wallOffset = LINE_WIDTH * i;
-        int pointsLeft = layerSection.size();
-        for (typename std::vector<Point>::iterator pointIt = layerSection.begin();
-             pointIt != layerSection.end();
-             ++pointIt)
+        for(int i = (wall_thickness-1); i >= 0; i--)
         {
-          pointsLeft--;
-          Point p = *pointIt;
-          Eigen::Vector2f v = applyWallOffset(p, wallOffset);
-          if(layerCount <= midpoint)
+          float wallOffset = LINE_WIDTH * i;
+          //int pointsLeft = layerSection.size();
+          bool firstPoint = true;
+          for (typename std::vector<Point>::iterator pointIt = layerSection.begin();
+               pointIt != layerSection.end();
+               ++pointIt)
           {
-            v = v + (((v / v.norm()) / 10) * (1.0f + offsetOut));//(offset * (layersOriginal.size() - layerCount));
-          }
-          else
-          {
-            v = v + (((v / v.norm()) / 10) * (1.0f +  offsetIn));//(offset * layerCount);
-          }
-          v += c;
-          ph.extrudeXYAxisTo(v[0], v[1]);
-          if(pointsLeft == 0 && i != 0)
-          {
-            Point p = layerSection.back();
-            float wallOffset = LINE_WIDTH * (i - 1);
+            //pointsLeft--;
+            Point p = *pointIt;
             Eigen::Vector2f v = applyWallOffset(p, wallOffset);
             if(layerCount <= midpoint)
             {
@@ -519,29 +508,53 @@ SlicerT<M>::writeGcode(double offset)
               v = v + (((v / v.norm()) / 10) * (1.0f +  offsetIn));//(offset * layerCount);
             }
             v += c;
-            ph.moveXYAxisTo(v[0], v[1]);
-
+            if(firstPoint)
+            {
+              ph.moveXYAxisTo(v[0], v[1]);
+              firstPoint = false;
+            }
+            else
+            {
+              ph.extrudeXYAxisTo(v[0], v[1]);
+            }
           }
         }
       }
-      //if(layerCount <= oneFromLastLayer)
-      //{
-        //typename std::vector<std::vector<std::vector<Point > > >::iterator layerItTemp = layerIt;
-        //layerItTemp++;
-        //std::vector<std::vector<Point > > nextLayer = *layerItTemp;
-        //Point p = nextLayer.back().back();
-        //Eigen::Vector2f v = applyWallOffset(p, wOffset);
-        //if(layerCount <= midpoint)
-        //{
-          //v = v + (((v / v.norm()) / 10) * (1.0f + offsetOut));//(offset * (layersOriginal.size() - layerCount));
-        //}
-        //else
-        //{
-          //v = v + (((v / v.norm()) / 10) * (1.0f +  offsetIn));//(offset * layerCount);
-        //}
-        //v += c;
-        //ph.moveXYAxisTo(v[0], v[1]);
-      //}
+      else
+      {
+        for(int i = 0; i < wall_thickness; i++)
+        {
+          float wallOffset = LINE_WIDTH * i;
+          //int pointsLeft = layerSection.size();
+          bool firstPoint = true;
+          for (typename std::vector<Point>::iterator pointIt = layerSection.begin();
+               pointIt != layerSection.end();
+               ++pointIt)
+          {
+            //pointsLeft--;
+            Point p = *pointIt;
+            Eigen::Vector2f v = applyWallOffset(p, wallOffset);
+            if(layerCount <= midpoint)
+            {
+              v = v + (((v / v.norm()) / 10) * (1.0f + offsetOut));//(offset * (layersOriginal.size() - layerCount));
+            }
+            else
+            {
+              v = v + (((v / v.norm()) / 10) * (1.0f +  offsetIn));//(offset * layerCount);
+            }
+            v += c;
+            if(firstPoint)
+            {
+              ph.moveXYAxisTo(v[0], v[1]);
+              firstPoint = false;
+            }
+            else
+            {
+              ph.extrudeXYAxisTo(v[0], v[1]);
+            }
+          }
+        }
+      }
     }
     layerCount++;
     ph.moveZAxis();

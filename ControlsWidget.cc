@@ -69,6 +69,18 @@ void ControlsWidget::addControls()
   resampleBtn = new QCheckBox("Resample", this);
   vlay->addWidget(resampleBtn);
   
+
+  outlineGroupBox = new QGroupBox(tr("Outline Route"));
+  outlineRadio1 = new QRadioButton(tr("In -> Out"));
+  outlineRadio2 = new QRadioButton(tr("Out -> In"));
+  outlineRadio1->setChecked(true);
+  QVBoxLayout *vboxOutline = new QVBoxLayout;
+  vboxOutline->addWidget(outlineRadio1);
+  vboxOutline->addWidget(outlineRadio2);
+  vboxOutline->addStretch(1);
+  outlineGroupBox->setLayout(vboxOutline);
+  vlay->addWidget(outlineGroupBox);
+
   sliceBtn = new QPushButton("Slice Mesh");
   vlay->addWidget(sliceBtn);
 
@@ -105,6 +117,7 @@ void ControlsWidget::addControls()
   //lineSlider->setMaximumHeight(200);
   //lineSlider->setHidden(true);
   //vlay->addWidget(lineSlider);
+  //
 
   addActions();
 }
@@ -125,6 +138,14 @@ void ControlsWidget::addActions()
   connect(radio3, SIGNAL(clicked()),this, SLOT(toggleRadio3()));
   connect(radio4, SIGNAL(clicked()),this, SLOT(toggleRadio4()));
   //connect(radio5, SIGNAL(clicked()),this, SLOT(toggleRadio5()));
+  connect(outlineRadio1, SIGNAL(clicked()),this, SLOT(toggleOutline()));
+  connect(outlineRadio2, SIGNAL(clicked()),this, SLOT(toggleOutline()));
+}
+
+
+void ControlsWidget::toggleOutline()
+{
+  meshViewer->toggleOutline();
 }
 
 

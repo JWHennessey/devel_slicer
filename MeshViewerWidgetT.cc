@@ -70,7 +70,12 @@ using namespace Qt;
 using namespace Qt;
 //== IMPLEMENTATION ========================================================== 
 
-
+template <typename M>
+void
+MeshViewerWidgetT<M>::toggleOutline()
+{
+  outlinePath = !outlinePath;
+}
 
 template <typename M>
 void
@@ -233,7 +238,7 @@ template <typename M>
 void 
 MeshViewerWidgetT<M>::slice_mesh_alt(double layerHeight, double offset, int wallthickness)
 {
-   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, resample, wallthickness);
+   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, resample, wallthickness, outlinePath);
    toolpath = slicer.getToolpathGraph();
    layerHeight = toolpath.size();
    lineNumber = getLineNumber();
@@ -251,7 +256,7 @@ template <typename M>
 void 
 MeshViewerWidgetT<M>::slice_mesh(double layerHeight, double offset, int wallthickness)
 {
-   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, resample, wallthickness);
+   SlicerT<M> slicer = SlicerT<M>(mesh_, layerHeight, resample, wallthickness, outlinePath);
    toolpath = slicer.getToolpath();
    layerHeight = toolpath.size();
    lineNumber = getLineNumber();
@@ -285,6 +290,7 @@ MeshViewerWidgetT<M>::MeshViewerWidgetT(QWidget* _parent)
       displayPath(true),
       displayPoints(true),
       displayCurvature(false),
+      outlinePath(true),
       resample(false),
       f_strips_(false), 
       tex_id_(0),

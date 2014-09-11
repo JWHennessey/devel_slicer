@@ -37,6 +37,7 @@ public slots:
   void toggleRadio4();
   //void toggleRadio5();
   void resampleToggle();
+  void toggleOutline();
 
 private:
   MeshViewerWidget* meshViewer;
@@ -60,6 +61,9 @@ private:
   QRadioButton *radio4;
   //QRadioButton *radio5;
   QGroupBox *groupBox;
+  QGroupBox *outlineGroupBox;
+  QRadioButton *outlineRadio1;
+  QRadioButton *outlineRadio2;
 
 
 };
