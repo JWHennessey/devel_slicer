@@ -480,6 +480,7 @@ SlicerT<M>::writeGcode(double offset)
        ++layerIt)
   {
     std::vector<std::vector<Point > > layer = *layerIt;
+    std::cout << "Layer Section: " << layer.size() << "\n";
     for (typename std::vector<std::vector<Point > >::iterator layerSectionIt = layer.begin();
          layerSectionIt != layer.end();
          ++layerSectionIt)
@@ -508,6 +509,8 @@ SlicerT<M>::writeGcode(double offset)
               v = v + (((v / v.norm()) / 10) * (1.0f +  offsetIn));//(offset * layerCount);
             }
             v += c;
+            //ph.extrudeXYAxisTo(v[0], v[1]);
+
             if(firstPoint)
             {
               ph.moveXYAxisTo(v[0], v[1]);
@@ -543,6 +546,7 @@ SlicerT<M>::writeGcode(double offset)
               v = v + (((v / v.norm()) / 10) * (1.0f +  offsetIn));//(offset * layerCount);
             }
             v += c;
+            //ph.extrudeXYAxisTo(v[0], v[1]);
             if(firstPoint)
             {
               ph.moveXYAxisTo(v[0], v[1]);
